@@ -1,5 +1,7 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import type { Config } from "tailwindcss";
+import konstaConfig from 'konsta/config';
+
 
 const config: Config = {
 	darkMode: ["class"],
@@ -61,4 +63,4 @@ const config: Config = {
 	},
 };
 
-export default config;
+export default konstaConfig(config);
