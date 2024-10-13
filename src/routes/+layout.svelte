@@ -1,5 +1,11 @@
 <script>
 	import '../app.pcss';
+	import { App, KonstaProvider } from 'konsta/svelte';
+	const { children } = $props();
 </script>
 
-<slot></slot>
+<KonstaProvider theme="ios">
+	<App theme="ios" class="k-ios">
+		{@render children()}
+	</App>
+</KonstaProvider>
