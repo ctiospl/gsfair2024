@@ -1,0 +1,19 @@
+GSFAIR2024:
+
+USER MANAGEMENT:
+    ☐ Registration
+    ☐ Login
+    ☐ Logout
+    ☐ Forgot Password
+    ☐ Reset Password
+
+EVENT MANAGEMENT:
+    ☐ Create Event
+    ☐ Edit Event
+    ☐ Delete Event
+    ☐ View Event
+
+Guests Registration:
+    ☐ Guest Registration
+    ☐ Guest Login
+    ☐ Guest Logout
