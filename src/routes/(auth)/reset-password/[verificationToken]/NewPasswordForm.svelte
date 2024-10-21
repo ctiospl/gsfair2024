@@ -5,17 +5,16 @@
 	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
 
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
-	import { loginSchema } from '$lib/zod/schema.js';
+	import { newPasswordSchema } from '$lib/zod/schema.js';
 	import { type Infer, type SuperValidated, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	import { Button } from '$lib/components/ui/button';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 
-	export let data: SuperValidated<Infer<typeof loginSchema>>;
+	export let data: SuperValidated<Infer<typeof newPasswordSchema>>;
 	const form = superForm(data, {
-		validators: zodClient(loginSchema),
-		resetForm: false,
+		validators: zodClient(newPasswordSchema),
 		onSubmit: () => {
 			LoadingDialog.value = true;
 
@@ -30,25 +29,11 @@
 			console.log('e :>> ', e);
 		}
 	});
+
 	const { form: formData, enhance } = form;
 </script>
 
 <form method="POST" use:enhance>
-	<Field {form} name="username">
-		<Control let:attrs>
-			<Label>Username</Label>
-			<Input
-				{...attrs}
-				type="text"
-				autocapitalize="off"
-				autocomplete="off"
-				autocorrect="off"
-				bind:value={$formData.username}
-			/>
-		</Control>
-		<!-- <Description>OMS Username</Description> -->
-		<FieldErrors />
-	</Field>
 	<Field {form} name="password">
 		<Control let:attrs>
 			<Label>Password</Label>
@@ -60,12 +45,23 @@
 			/>
 		</Control>
 		<!-- <Description>OMS Password.</Description> -->
-		<FieldErrors />
+		<FieldErrors class="text-xs italic text-red-500" />
+	</Field>
+	<Field {form} name="confirmPassword">
+		<Control let:attrs>
+			<Label>Confirm Password</Label>
+			<PasswordInput
+				{...attrs}
+				autocapitalize="off"
+				type="password"
+				bind:value={$formData.confirmPassword}
+			/>
+		</Control>
+		<!-- <Description>OMS Password.</Description> -->
+		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 
-	<Form.Button class="mt-8 w-full">Login</Form.Button>
+	<Form.Button class="mt-8 w-full">Save</Form.Button>
 	<Separator class="mx-auto my-4 w-[90%]" />
-	<Button href="/register" variant="outline" class="w-full">Register</Button>
-	<Separator class="mx-auto my-4 w-[90%]" />
-	<Button href="/reset-password" variant="ghost" class="w-full">Forgot Username or Password</Button>
+	<Button href="/login" variant="outline" class="w-full">Login</Button>
 </form>

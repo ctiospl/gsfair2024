@@ -1,21 +1,19 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import PasswordInput from '$lib/components/ui/password-input/password-input.svelte';
 	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
 
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
-	import { loginSchema } from '$lib/zod/schema.js';
+	import { resetAuthSchema } from '$lib/zod/schema.js';
 	import { type Infer, type SuperValidated, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	import { Button } from '$lib/components/ui/button';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 
-	export let data: SuperValidated<Infer<typeof loginSchema>>;
+	export let data: SuperValidated<Infer<typeof resetAuthSchema>>;
 	const form = superForm(data, {
-		validators: zodClient(loginSchema),
-		resetForm: false,
+		validators: zodClient(resetAuthSchema),
 		onSubmit: () => {
 			LoadingDialog.value = true;
 
@@ -30,42 +28,43 @@
 			console.log('e :>> ', e);
 		}
 	});
+	function cleanPhoneNumber(phoneNumber: string | number): string {
+		const stringNumber = String(phoneNumber);
+
+		// Remove country code, spaces, hyphens, and parentheses
+		const cleaned = stringNumber.replace(/^(\+|00)\d{1,3}[-\s]?|\D/g, '');
+
+		// Limit to maximum 10 digits
+		return cleaned.slice(0, 10);
+	}
+
 	const { form: formData, enhance } = form;
 </script>
 
 <form method="POST" use:enhance>
-	<Field {form} name="username">
+	<Field {form} name="phone">
 		<Control let:attrs>
-			<Label>Username</Label>
+			<Label>Phone Number ( without country code )</Label>
 			<Input
 				{...attrs}
-				type="text"
+				type="tel"
 				autocapitalize="off"
-				autocomplete="off"
+				autocomplete="on"
 				autocorrect="off"
-				bind:value={$formData.username}
+				bind:value={$formData.phone}
+				placeholder="e.g. 9823456789"
+				onkeyup={(e) => {
+					if (e?.target?.value) {
+						e.target.value = cleanPhoneNumber(e.target.value);
+					}
+				}}
 			/>
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
-		<FieldErrors />
-	</Field>
-	<Field {form} name="password">
-		<Control let:attrs>
-			<Label>Password</Label>
-			<PasswordInput
-				{...attrs}
-				autocapitalize="off"
-				type="password"
-				bind:value={$formData.password}
-			/>
-		</Control>
-		<!-- <Description>OMS Password.</Description> -->
-		<FieldErrors />
+		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 
-	<Form.Button class="mt-8 w-full">Login</Form.Button>
+	<Form.Button class="mt-8 w-full">Email me the new password</Form.Button>
 	<Separator class="mx-auto my-4 w-[90%]" />
-	<Button href="/register" variant="outline" class="w-full">Register</Button>
-	<Separator class="mx-auto my-4 w-[90%]" />
-	<Button href="/reset-password" variant="ghost" class="w-full">Forgot Username or Password</Button>
+	<Button href="/login" variant="outline" class="w-full">Login</Button>
 </form>

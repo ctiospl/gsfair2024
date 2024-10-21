@@ -1,12 +1,14 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
+	import PasswordInput from '$lib/components/ui/password-input/password-input.svelte';
 	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
 
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
 	import { authSchema } from '$lib/zod/schema.js';
 	import { type Infer, type SuperValidated, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+
 	import { Button } from '$lib/components/ui/button';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 
@@ -128,7 +130,12 @@
 	<Field {form} name="password">
 		<Control let:attrs>
 			<Label>Password</Label>
-			<Input {...attrs} autocapitalize="off" type="password" bind:value={$formData.password} />
+			<PasswordInput
+				{...attrs}
+				autocapitalize="off"
+				type="password"
+				bind:value={$formData.password}
+			/>
 		</Control>
 		<!-- <Description>OMS Password.</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />

@@ -52,7 +52,7 @@ export const actions: Actions = {
 					lastname,
 					email,
 					phone,
-					is_super_admin: false,
+					is_super_admin: 0,
 					role: 'volunteer',
 					password_hash: passwordHash
 				})

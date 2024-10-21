@@ -24,6 +24,32 @@ export const loginSchema = z.object({
 	password: z.string()
 });
 
+export const resetAuthSchema = z.object({
+	phone: z.string().regex(phoneRegex, 'Invalid Number!')
+});
+export const newPasswordSchema = z
+	.object({
+		password: z
+			.string()
+			.min(8, { message: 'Must be 8 or more characters long' })
+			.max(128, { message: 'Max 128 characters long' })
+			.refine((s) => !s.includes(' '), 'No Spaces Allowed!'),
+		confirmPassword: z
+			.string()
+			.min(8, { message: 'Must be 8 or more characters long' })
+			.max(128, { message: 'Max 128 characters long' })
+			.refine((s) => !s.includes(' '), 'No Spaces Allowed!')
+	})
+	.superRefine(({ confirmPassword, password }, ctx) => {
+		if (confirmPassword !== password) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'The passwords did not match',
+				path: ['confirmPassword']
+			});
+		}
+	});
+
 export const addAdvancePackingSchema = z.object({
 	pid: z.number(),
 	qty: z.number(),

@@ -10,7 +10,12 @@ export type CashBalanceType = {
 	value: number;
 };
 
+export type CurrentEventIdType = {
+	value: number;
+};
+
 
 export const LeftMenuPanel: LeftMenuPanelType = $state({ value: false });
 export const LoadingDialog: LoadingDialogType = $state({ value: false });
 export const CashBalance: CashBalanceType = $state({ value: 0 });
+export const CurrentEventId: CurrentEventIdType = $state({ value: 0 });
