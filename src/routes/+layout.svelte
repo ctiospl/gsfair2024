@@ -1,62 +1,72 @@
 <script lang="ts">
 	import '../app.pcss';
 	import { page } from '$app/stores';
-	import { App, Dialog, KonstaProvider, Notification, Preloader } from 'konsta/svelte';
+
 	import { getFlash } from 'sveltekit-flash-message';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { toast } from 'svelte-sonner';
 
 	import FakeProgressBar from '$lib/components/FakeProgressBar.svelte';
-	import { LoadingDialog } from '$lib/ui-item-states.svelte';
+	import PopupQrScanner from '$lib/components/PopupQrScanner.svelte';
+	import Preloader from '$lib/components/Preloader.svelte';
+	import {
+		QrScannerTitle,
+		QrScannerOnScan,
+		QrScannerAutostart,
+		PopupQrScannerOpened,
+		LoadingDialog
+	} from '$lib/ui-item-states.svelte';
 
-	const { children } = $props();
+	// const { children } = $props();
+
+	let { children } = $props();
 
 	const flash = getFlash(page);
 	let notificationWithButton = $state(false);
-	let notificationColor = $state('!bg-red-500');
+	let notificationColor = $state('!bg-[#B12646]');
+	let notificationButtonColor = $state('!text-[#B12646]');
+	let notificationBorderColor = $state('border-[#B12646]');
 	let notificationTitle = $state('');
 	let notificationText = $state('');
-	const openNotification = (setter: unknown) => {
-		notificationWithButton = true;
-		(setter as () => void)();
-		if (notificationWithButton) {
-			setTimeout(() => {
-				notificationWithButton = false;
-			}, 3000);
-		}
-	};
+
 	$effect(() => {
 		// console.log("$flash :>> ", $flash);
 		if ($flash) {
-			notificationColor = $flash.type === 'success' ? '!bg-emerald-500' : '!bg-red-500';
+			notificationColor = $flash.type === 'success' ? '!bg-[#72A17D]' : '!bg-[#B12646]';
+			notificationButtonColor = $flash.type === 'success' ? '!text-[#72A17D]' : '!text-[#B12646]';
+			notificationBorderColor = $flash.type === 'success' ? 'border-[#72A17D]' : 'border-[#B12646]';
 			notificationTitle = $flash.type === 'success' ? 'Success' : 'Error';
 			notificationText = $flash.message;
 			notificationWithButton = true;
-			openNotification(() => {});
+			// toast();
+			toast(notificationTitle, {
+				description: notificationText,
+				classes: {
+					toast: notificationColor,
+					title: 'text-white font-bold text-lg',
+					description: '!text-white text-md',
+					closeButton: `bg-white ${notificationButtonColor} border-2 ${notificationBorderColor}`
+				}
+			});
 			$flash = undefined;
+		}
+	});
+	$effect(() => {
+		if (!$page.state.popupQrScannerOpened) {
+			PopupQrScannerOpened.value = false;
 		}
 	});
 </script>
 
-<KonstaProvider theme="ios">
-	<App theme="ios" class="!h-dvh !min-h-dvh">
-		{@render children()}
-		<Notification
-			opened={notificationWithButton}
-			class="{notificationColor} fixed top-0 text-white"
-			colors={{
-				titleIos: 'text-white',
-				bgIos: notificationColor,
-				subtitleIos: 'text-white',
-				deleteIconIos: 'text-white'
-			}}
-			title={notificationTitle}
-			text={notificationText}
-			onClose={async () => {
-				notificationWithButton = false;
-			}}
-		></Notification>
-		<Dialog opened={LoadingDialog.value} colors={{ bgIos: 'transparent' }}>
-			<Preloader size="w-16 h-16" />
-		</Dialog>
-	</App>
-</KonstaProvider>
+<div class="!h-dvh !min-h-dvh">
+	{@render children()}
+	<Toaster position="top-center" closeButton={notificationWithButton} />
+	<Preloader bind:open={LoadingDialog.value} />
+</div>
 <FakeProgressBar />
+
+<PopupQrScanner
+	onScanSuccess={QrScannerOnScan.value}
+	scannerTitle={QrScannerTitle.value}
+	autostart={QrScannerAutostart.value}
+/>

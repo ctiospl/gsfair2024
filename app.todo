@@ -1,5 +1,6 @@
 GSFAIR2024:
 
+
 USER MANAGEMENT:
     ☐ Registration
     ☐ Login
@@ -17,3 +18,29 @@ Guests Registration:
     ☐ Guest Registration
     ☐ Guest Login
     ☐ Guest Logout
+
+
+
+CASH FLOW Logic:
+    ☐ Start with Cash Balance with Admin
+
+    ☐ Only the Admin can transfer money to the volunteers
+    ☐ Collector Only Collects never gives money to the volunteers
+
+    ☐ Admin transfers money to user using QRCODE
+        ☐ User scans QRCODE and gets the money
+
+    ☐ Every once in a while the collector collects money from the volunteers, leaving some change with them.
+    ☐ When the shift changes, the next volunteer transfers the money to the next volunteer using the QRCODE
+    ☐ The collector keeps collecting money till the end.
+
+To Fix:
+    ☐ DoubleIssue/DoubleSpend -> Page Refresh
+    ☐ Cash Envelope Accounting
+    ☐ Show total Sales per Event(Only to POCs)
+
+Nice to Have:
+    ☐ Visitors can prefill the forms in Queue -> Generate QRCode for Payment
+    ☐ Have Volunteers prefill the forms in Queue -> Generate QRCode for Payment
+    ☐ Visitors Can Pay Online using GPay/Razorpay etc & generate collection QRCode
+    ☐ Visitors can check their own balances using a webpage

@@ -37,7 +37,6 @@ export const actions: Actions = {
 				.limit(1)
 				// .$call(sqlString)
 				.executeTakeFirstOrThrow();
-			// console.log('user :>> ', user);
 			const isApproved = existingUser.approved;
 			if (!isApproved) {
 				setError(
@@ -69,17 +68,12 @@ export const actions: Actions = {
 			}
 
 			const session = await lucia.createSession(existingUser.id, {});
-            console.log('session :>> ', session);
 			const sessionCookie = lucia.createSessionCookie(session.id);
             const { session: sessionX, user } = await lucia.validateSession(session.id);
-            console.log('sessionX :>> ', sessionX);
-            console.log('user :>> ', user);
-            console.log('sessionCookie :>> ', sessionCookie);
 			cookies.set(sessionCookie.name, sessionCookie.value, {
 				path: '.',
 				...sessionCookie.attributes
 			});
-            console.log('cookies :>> ', cookies.get(sessionCookie.name));
 		} catch (error) {
 			console.log('errorX :>> ', error);
 			setFlash({ type: 'error', message: 'Invalid username or password' }, cookies);

@@ -43,22 +43,24 @@
 
 <form method="POST" use:enhance>
 	<Field {form} name="phone">
-		<Control let:attrs>
-			<Label>Phone Number ( without country code )</Label>
-			<Input
-				{...attrs}
-				type="tel"
-				autocapitalize="off"
-				autocomplete="on"
-				autocorrect="off"
-				bind:value={$formData.phone}
-				placeholder="e.g. 9823456789"
-				onkeyup={(e) => {
-					if (e?.target?.value) {
-						e.target.value = cleanPhoneNumber(e.target.value);
-					}
-				}}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Phone Number ( without country code )</Label>
+				<Input
+					{...props}
+					type="tel"
+					autocapitalize="off"
+					autocomplete="on"
+					autocorrect="off"
+					bind:value={$formData.phone}
+					placeholder="e.g. 9823456789"
+					onkeyup={(e) => {
+						if (e?.target?.value) {
+							e.target.value = cleanPhoneNumber(e.target.value);
+						}
+					}}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />

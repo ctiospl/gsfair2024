@@ -43,99 +43,111 @@
 
 <form method="POST" use:enhance>
 	<Field {form} name="firstname">
-		<Control let:attrs>
-			<Label>First Name</Label>
-			<Input
-				{...attrs}
-				type="text"
-				autocapitalize="on"
-				autocomplete="on"
-				autocorrect="off"
-				bind:value={$formData.firstname}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>First Name</Label>
+				<Input
+					{...props}
+					type="text"
+					autocapitalize="on"
+					autocomplete="on"
+					autocorrect="off"
+					bind:value={$formData.firstname}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="lastname">
-		<Control let:attrs>
-			<Label>Last Name</Label>
-			<Input
-				{...attrs}
-				type="text"
-				autocapitalize="on"
-				autocomplete="on"
-				autocorrect="off"
-				bind:value={$formData.lastname}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Last Name</Label>
+				<Input
+					{...props}
+					type="text"
+					autocapitalize="on"
+					autocomplete="on"
+					autocorrect="off"
+					bind:value={$formData.lastname}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="email">
-		<Control let:attrs>
-			<Label>Email</Label>
-			<Input
-				{...attrs}
-				type="email"
-				autocapitalize="off"
-				autocomplete="off"
-				autocorrect="off"
-				bind:value={$formData.email}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Email</Label>
+				<Input
+					{...props}
+					type="email"
+					autocapitalize="off"
+					autocomplete="off"
+					autocorrect="off"
+					bind:value={$formData.email}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="phone">
-		<Control let:attrs>
-			<Label>Phone</Label>
-			<Input
-				{...attrs}
-				type="tel"
-				autocapitalize="off"
-				autocomplete="on"
-				autocorrect="off"
-				bind:value={$formData.phone}
-				onkeyup={(e) => {
-					if (e?.target?.value) {
-						e.target.value = cleanPhoneNumber(e.target.value);
-					}
-					// console.log('e.taget.value :>> ', e.taget.value);
-					// // console.log('e.key :>> ', e.key);
-					// if (e.key === ' ') {
-					// 	e.preventDefault();
-					// }
-				}}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Phone</Label>
+				<Input
+					{...props}
+					type="tel"
+					autocapitalize="off"
+					autocomplete="on"
+					autocorrect="off"
+					bind:value={$formData.phone}
+					onkeyup={(e) => {
+						if (e?.target?.value) {
+							e.target.value = cleanPhoneNumber(e.target.value);
+						}
+						// console.log('e.taget.value :>> ', e.taget.value);
+						// // console.log('e.key :>> ', e.key);
+						// if (e.key === ' ') {
+						// 	e.preventDefault();
+						// }
+					}}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="username">
-		<Control let:attrs>
-			<Label>Username</Label>
-			<Input
-				{...attrs}
-				type="text"
-				autocapitalize="off"
-				autocomplete="off"
-				autocorrect="off"
-				bind:value={$formData.username}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Username</Label>
+				<Input
+					{...props}
+					type="text"
+					autocapitalize="off"
+					autocomplete="off"
+					autocorrect="off"
+					bind:value={$formData.username}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Username</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="password">
-		<Control let:attrs>
-			<Label>Password</Label>
-			<PasswordInput
-				{...attrs}
-				autocapitalize="off"
-				type="password"
-				bind:value={$formData.password}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Password</Label>
+				<PasswordInput
+					{...props}
+					autocapitalize="off"
+					type="password"
+					bind:value={$formData.password}
+				/>
+			{/snippet}
 		</Control>
 		<!-- <Description>OMS Password.</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
