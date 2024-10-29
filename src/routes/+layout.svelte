@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '../app.pcss';
+	import '../app.css';
 	import { page } from '$app/stores';
 
 	import { getFlash } from 'sveltekit-flash-message';
@@ -35,10 +35,14 @@
 			notificationColor = $flash.type === 'success' ? '!bg-[#72A17D]' : '!bg-[#B12646]';
 			notificationButtonColor = $flash.type === 'success' ? '!text-[#72A17D]' : '!text-[#B12646]';
 			notificationBorderColor = $flash.type === 'success' ? 'border-[#72A17D]' : 'border-[#B12646]';
-			notificationTitle = $flash.type === 'success' ? 'Success' : 'Error';
-			notificationText = $flash.message;
+			notificationTitle = $flash.message.title
+				? $flash.message.title
+				: $flash.type === 'success'
+					? 'Success'
+					: 'Error';
+			notificationText = $flash.message.text;
 			notificationWithButton = true;
-			// toast();
+
 			toast(notificationTitle, {
 				description: notificationText,
 				classes: {
@@ -48,9 +52,11 @@
 					closeButton: `bg-white ${notificationButtonColor} border-2 ${notificationBorderColor}`
 				}
 			});
+
 			$flash = undefined;
 		}
 	});
+
 	$effect(() => {
 		if (!$page.state.popupQrScannerOpened) {
 			PopupQrScannerOpened.value = false;

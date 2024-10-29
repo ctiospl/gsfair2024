@@ -62,7 +62,7 @@
 		// PopupQrScannerOpened.value = false;
 	}
 
-	let menuItems = $state([
+	let commonMenuItems = [
 		{
 			title: 'Home',
 			icon: Shell,
@@ -72,7 +72,7 @@
 			title: 'Collect ₹/Scan QR',
 			icon: QrCode,
 
-			url: `/app/collect-payment`
+			url: `/app/collect-payment?scannerOpened=true`
 		},
 		{
 			title: 'Check Balance',
@@ -87,38 +87,48 @@
 			icon: ScrollText,
 			url: `/app/volunteer-transactions`
 		}
-	]);
+	];
+
+	let endMenuItems = [
+		{
+			title: 'SOS',
+			icon: AlertCircle,
+			url: `/app/sos`
+		}
+	];
+	let menuItems: typeof commonMenuItems = $state([]);
 	switch (role) {
 		case 'volunteer':
+			menuItems = [...commonMenuItems, ...endMenuItems];
 			break;
 
 		case 'refund':
-			menuItems.push(
-				...[
-					{
-						title: 'Add ₹ to QrCode',
-						icon: Plus,
-						// icon2: IndianRupee,
-						// icon3: Wallet,
-						url: `/recharge-qrcode`
-					},
-					{
-						title: 'Issue Refund(Cash)',
-						icon: IndianRupee,
-						url: `/refund-issue`
-					},
-					{
-						title: 'Balance Transfer',
-						icon: ArrowRight,
-						url: `/balance-transfer`
-					}
-				]
-			);
+			menuItems = [
+				...commonMenuItems,
+				{
+					title: 'Add ₹ to QrCode',
+					icon: Plus,
+					// icon2: IndianRupee,
+					// icon3: Wallet,
+					url: `/recharge-qrcode`
+				},
+				{
+					title: 'Issue Refund(Cash)',
+					icon: IndianRupee,
+					url: `/refund-issue`
+				},
+				{
+					title: 'Balance Transfer',
+					icon: ArrowRight,
+					url: `/balance-transfer`
+				},
+				...endMenuItems
+			];
 
 			break;
 		case 'recharge':
 			menuItems = [
-				...menuItems,
+				...commonMenuItems,
 				{
 					title: 'Add ₹ to QrCode',
 					icon: Plus,
@@ -130,13 +140,14 @@
 					title: 'Balance Transfer',
 					icon: ArrowRight,
 					url: `/app/balance-transfer`
-				}
+				},
+				...endMenuItems
 			];
 
 			break;
 		case 'registration':
 			menuItems = [
-				...menuItems,
+				...commonMenuItems,
 				{
 					title: 'Visitor Registration',
 					icon: UserPlus,
@@ -158,13 +169,14 @@
 					title: 'Balance Transfer',
 					icon: ArrowRight,
 					url: `/app/balance-transfer`
-				}
+				},
+				...endMenuItems
 			];
 
 			break;
 		case 'super':
 			menuItems = [
-				...menuItems,
+				...commonMenuItems,
 				{
 					title: 'Visitor Registration',
 					icon: UserPlus,
@@ -201,30 +213,21 @@
 					title: 'Issue Refund(Cash)',
 					icon: IndianRupee,
 					url: `/app/refund-issue`
-				}
+				},
+				...endMenuItems
 			];
-
 			break;
 
 		default:
 			menuItems = [];
 			break;
 	}
-
-	menuItems = [
-		...menuItems,
-		{
-			title: 'SOS',
-			icon: AlertCircle,
-			url: `/app/sos`
-		}
-	];
 </script>
 
 <Sheet.Root bind:open={LeftMenuPanel.value}>
 	<Sheet.Trigger></Sheet.Trigger>
-	<Sheet.Content side="left" class="m-0 p-0 no-scrollbar sm:max-w-xs">
-		<ScrollArea class="m-0 h-full w-full p-0 no-scrollbar">
+	<Sheet.Content side="left" class="no-scrollbar m-0 p-0 sm:max-w-xs">
+		<ScrollArea class="no-scrollbar m-0 h-full w-full p-0">
 			<nav class="grid gap-6 text-lg font-medium">
 				<div class="flex justify-between">
 					<button
@@ -244,9 +247,6 @@
 				<Button
 					class="ml-4 w-[90%] !bg-black"
 					onclick={async () => {
-						pushState('?scannerOpened=true', {
-							popupQrScannerOpened: true
-						});
 						QrScannerTitle.value = 'Scan Event QR Code';
 						QrScannerOnScan.value = await UpdateSelectedEvent;
 						QrScannerAutostart.value = false;

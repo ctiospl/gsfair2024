@@ -1,9 +1,15 @@
 import { getFlash } from 'sveltekit-flash-message';
-import { page } from '$app/stores';
-const flash = getFlash(page);
+import { page as Page } from '$app/stores';
+interface MessageParams {
+	type?: string;
+	title?: string;
+	text?: string;
+}
 
-function showMessage(type: 'success' | 'error', message = 'Success') {
-	$flash = { type, message };
+function showMessage(page: typeof Page, params: MessageParams) {
+	const { type = 'error', title, text = 'error' } = params;
+	const flash = getFlash(page);
+	flash.set({ type: type as 'error' | 'success', message: { title: title || '', text } });
 }
 
 export { showMessage };
