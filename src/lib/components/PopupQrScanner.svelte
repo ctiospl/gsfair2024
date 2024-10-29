@@ -1,8 +1,7 @@
 <script lang="ts">
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { PopupQrScannerOpened } from '$lib/ui-item-states.svelte';
-	import { page } from '$app/stores';
-
+	import { pushState } from '$app/navigation';
 	import QrcodeStream from '$lib/components/BarcodeScanner/QrcodeStream.svelte';
 
 	let {
@@ -137,7 +136,6 @@
 		} else {
 			if (detectedCodes[0].rawValue != '') {
 				PopupQrScannerOpened.value = false;
-				history.back();
 				return onScanSuccess(detectedCodes[0].rawValue);
 			}
 		}
@@ -179,6 +177,17 @@
 			}
 		}
 	});
+	$effect(() => {
+		if (PopupQrScannerOpened.value) {
+			pushState('?scannerOpened=true', {
+				popupQrScannerOpened: true
+			});
+		} else {
+			if (history.state.popupQrScannerOpened) {
+				history.back();
+			}
+		}
+	});
 </script>
 
 <Sheet.Root bind:open={PopupQrScannerOpened.value}>
@@ -200,6 +209,3 @@
 		</Sheet.Header>
 	</Sheet.Content>
 </Sheet.Root>
-
-<style>
-</style>

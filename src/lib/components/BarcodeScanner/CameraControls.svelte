@@ -18,9 +18,9 @@
 	let {
 		videoDevices = [],
 		currentCamera = '',
-		showCameraSelector = false,
+		showCameraSelector = $bindable(false),
 		torchSupport = false,
-		torchOn = false,
+		torchOn = $bindable(false),
 		onCameraChange,
 		onTorchToggle
 	} = $props<Props>();
@@ -28,8 +28,20 @@
 	const TorchIcon = $derived(torchOn ? Lightbulb : LightbulbOff);
 </script>
 
-<Button variant="ghost" class="absolute right-0 top-0 z-50 h-12 w-12 rounded-full bg-white p-2">
-	<SwitchCamera class="" onclick={() => (showCameraSelector = true)} />
+<Button
+	variant="ghost"
+	class="absolute right-0 top-0 z-50 h-12 w-12 rounded-full bg-white p-2 [&_svg]:size-7"
+	onclick={() => {
+		showCameraSelector = true;
+		console.log('showCameraSelector :>> ', showCameraSelector);
+	}}
+>
+	<SwitchCamera
+		onclick={() => {
+			showCameraSelector = true;
+			console.log('showCameraSelector :>> ', showCameraSelector);
+		}}
+	/>
 </Button>
 
 <Sheet.Root bind:open={showCameraSelector}>
@@ -51,7 +63,7 @@
 
 {#if torchSupport}
 	<TorchIcon
-		class="fixed z-20 h-14 w-14 rounded-full bg-black p-4 text-white right-4-safe bottom-4-safe {torchOn
+		class="right-4-safe bottom-4-safe fixed z-20 h-14 w-14 rounded-full bg-black p-4 text-white [&_svg]:size-7 {torchOn
 			? 'bg-yellow-600'
 			: ''}"
 		onclick={onTorchToggle}

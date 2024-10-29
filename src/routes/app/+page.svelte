@@ -1,9 +1,9 @@
 <script lang="ts">
 	const { data } = $props();
-	// lib
+	// lib/functions
 	import { goto } from '$app/navigation';
-	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
+	import { showMessage } from '$lib/flash-messages.svelte';
 
 	// state
 	import { LeftMenuPanel, LoadingDialog } from '$lib/ui-item-states.svelte';
@@ -14,30 +14,31 @@
 	// ui
 	import { LogOut, Menu as MenuIcon } from 'lucide-svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-
-	const flash = getFlash(page);
-	function showMessage(type, message = 'Success') {
-		$flash = { type, message };
-	}
 </script>
 
 <Navbar title="GS Fair 2024">
 	{#snippet leftLink()}
-		<Button variant="link" size="icon" onclick={() => (LeftMenuPanel.value = true)}
+		<Button
+			variant="link"
+			size="icon"
+			class="[&_svg]:size-7"
+			onclick={() => (LeftMenuPanel.value = true)}
 			><MenuIcon />
 		</Button>
 	{/snippet}
 	{#snippet rightLink()}
-		<Button variant="link" size="icon" onclick={() => goto('/logout')}><LogOut /></Button>
+		<Button variant="link" size="icon" class="[&_svg]:size-7" onclick={() => goto('/logout')}
+			><LogOut /></Button
+		>
 	{/snippet}
 </Navbar>
 
 <Button
 	onclick={async () => {
-		showMessage('success', 'Scanning QR Code');
 		LoadingDialog.value = true;
 		setTimeout(() => {
 			LoadingDialog.value = false;
+			showMessage(page, { type: 'success', text: 'Scanning QR Code' });
 		}, 3000);
 	}}>Scan QR Code</Button
 >

@@ -84,9 +84,6 @@ importers:
       formsnap:
         specifier: 2.0.0-next.0
         version: 2.0.0-next.0(svelte@5.1.3)(sveltekit-superforms@2.20.0(@sveltejs/kit@2.7.3(@sveltejs/vite-plugin-svelte@4.0.0(svelte@5.1.3)(vite@5.4.10))(svelte@5.1.3)(vite@5.4.10))(@types/json-schema@7.0.15)(svelte@5.1.3)(typescript@5.6.3))
-      konsta:
-        specifier: ^4.0.1
-        version: 4.0.1
       kysely-codegen:
         specifier: ^0.17.0
         version: 0.17.0(kysely@0.27.4)(mysql2@3.11.3)
@@ -1489,10 +1486,6 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
-
-  konsta@4.0.1:
-    resolution: {integrity: sha512-GMk/3yJ4ov9mLRwkr+ffbTtlyGMd+HMMPks8+/kZWJyIfD3Esy+cSVLN8wX+iJRQXNZfPfOBxaqQpxXA0AHLEA==}
-    engines: {node: '>= 4.7.0'}
 
   kysely-codegen@0.17.0:
     resolution: {integrity: sha512-C36g6epial8cIOSBEWGI9sRfkKSsEzTcivhjPivtYFQnhMdXnrVFaUe7UMZHeSdXaHiWDqDOkReJgWLD8nPKdg==}
@@ -3424,8 +3417,6 @@ snapshots:
   just-clone@6.2.0: {}
 
   kleur@4.1.5: {}
-
-  konsta@4.0.1: {}
 
   kysely-codegen@0.17.0(kysely@0.27.4)(mysql2@3.11.3):
     dependencies:
