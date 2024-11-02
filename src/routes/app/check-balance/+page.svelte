@@ -11,7 +11,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 
 	// ui
-	import { MenuIcon, QrCode } from 'lucide-svelte';
+	import { Menu, QrCode } from 'lucide-svelte';
 
 	// state
 	import { QrScannerTitle, QrScannerOnScan, QrScannerAutostart } from '$lib/ui-item-states.svelte';
@@ -57,7 +57,7 @@
 			size="icon"
 			class="[&_svg]:size-7"
 			onclick={() => (LeftMenuPanel.value = true)}
-			><MenuIcon />
+			><Menu />
 		</Button>
 	{/snippet}
 	{#snippet rightLink()}
@@ -70,21 +70,28 @@
 	{/snippet}
 </Navbar>
 
-<div
-	class="grid h-[80dvh] grid-flow-row auto-rows-fr content-center items-center justify-items-center"
->
+<div class="flex h-dvh flex-col">
 	{#if name}
-		<div class="text-3xl">
-			{name}
+		<div class="flex flex-1 items-center justify-center">
+			<h2 class="text-3xl font-bold">{name}</h2>
 		</div>
-		<div class="text-center text-xl">
-			<div>QrCode Balance</div>
-			<div class="text-3xl">
-				₹ {balance}
-			</div>
+
+		<div class="flex flex-1 items-center justify-center">
+			<p class="text-2xl">QrCode Balance</p>
+			<p class="text-3xl font-bold">₹ {balance}</p>
 		</div>
 	{:else}
-		<div class="p-8 text-2xl">Check your QrCode Balance</div>
-		<div class="p-8 text-2xl">Please click on the button below to scan the QrCode</div>
+		<div class="flex flex-1 items-center justify-center">
+			<div class="flex flex-col items-center justify-center">
+				<p class="pb-8 text-center text-3xl">
+					Please scan the QR Code of the visitor <br />to check their Balance
+				</p>
+
+				<Button
+					class="h-24 px-6 text-4xl [&_svg]:size-10"
+					onclick={() => (PopupQrScannerOpened.value = true)}><QrCode /> Scan QR Code</Button
+				>
+			</div>
+		</div>
 	{/if}
 </div>

@@ -1,8 +1,15 @@
 <script lang="ts">
+	import * as Drawer from '$lib/components/ui/drawer';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { PopupQrScannerOpened } from '$lib/ui-item-states.svelte';
+	import { Button } from '$lib/components/ui/button';
+
 	import { pushState } from '$app/navigation';
 	import QrcodeStream from '$lib/components/BarcodeScanner/QrcodeStream.svelte';
+	import { tick } from 'svelte';
+	import { X } from 'lucide-svelte';
+	import { page } from '$app/stores';
+	let closeButtonRef: HTMLButtonElement;
 
 	let {
 		onScanSuccess = (decodedText) => {
@@ -173,28 +180,45 @@
 	$effect(async () => {
 		if (isCameraReady) {
 			if (PopupQrScannerOpened.value) {
-				await qrcodeStream.StartCamera();
+				if (qrcodeStream) {
+					await qrcodeStream.StartCamera();
+				}
 			}
 		}
 	});
-	$effect(() => {
+	$effect(async () => {
 		if (PopupQrScannerOpened.value) {
+			await tick();
 			pushState('?scannerOpened=true', {
 				popupQrScannerOpened: true
 			});
-		} else {
-			if (history.state.popupQrScannerOpened) {
-				history.back();
-			}
 		}
 	});
+	$inspect(PopupQrScannerOpened);
 </script>
 
-<Sheet.Root bind:open={PopupQrScannerOpened.value}>
-	<Sheet.Content side="bottom" class="h-full w-full">
-		<Sheet.Header>
-			<Sheet.Title>{scannerTitle}</Sheet.Title>
-			<Sheet.Description>
+<Drawer.Root
+	dismissible={false}
+	controlledOpen={true}
+	direction="bottom"
+	bind:open={PopupQrScannerOpened.value}
+>
+	<Drawer.Content class="!h-dvh !w-dvw">
+		<Drawer.Header>
+			<Drawer.Close
+				onclick={() => {
+					PopupQrScannerOpened.value = false;
+					history.back();
+				}}
+				class="active:scale-98 absolute right-5 top-5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+			>
+				<div>
+					<X class="size-5 text-foreground" />
+					<span class="sr-only">Close</span>
+				</div>
+			</Drawer.Close>
+			<Drawer.Title>{scannerTitle}</Drawer.Title>
+			<Drawer.Description>
 				<QrcodeStream
 					bind:this={qrcodeStream}
 					constraints={selectedConstraints}
@@ -205,7 +229,8 @@
 					onCameraOn={onCameraReady}
 					{autostart}
 				/>
-			</Sheet.Description>
-		</Sheet.Header>
-	</Sheet.Content>
-</Sheet.Root>
+			</Drawer.Description>
+			<Drawer.Footer></Drawer.Footer>
+		</Drawer.Header>
+	</Drawer.Content>
+</Drawer.Root>

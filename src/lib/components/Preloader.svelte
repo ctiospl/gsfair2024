@@ -5,7 +5,7 @@
 
 <AlertDialog.Root bind:open>
 	<AlertDialog.Content
-		class="flex  !min-h-full !min-w-full items-center justify-center bg-transparent"
+		class="z-50 flex !min-h-full !min-w-full items-center justify-center bg-transparent"
 	>
 		<div class="animate-spin text-primary/60">
 			<svg

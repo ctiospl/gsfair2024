@@ -4,6 +4,7 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { Label } from '$lib/components/ui/label';
+	import { LoadingDialog } from '$lib/ui-item-states.svelte';
 
 	type Props = {
 		videoDevices: MediaDeviceInfo[];
@@ -25,6 +26,13 @@
 		onTorchToggle
 	} = $props<Props>();
 
+	async function onValueChange(value: string) {
+		LoadingDialog.value = true;
+		await onCameraChange(value);
+		showCameraSelector = false;
+		LoadingDialog.value = false;
+	}
+
 	const TorchIcon = $derived(torchOn ? Lightbulb : LightbulbOff);
 </script>
 
@@ -33,15 +41,9 @@
 	class="absolute right-0 top-0 z-50 h-12 w-12 rounded-full bg-white p-2 [&_svg]:size-7"
 	onclick={() => {
 		showCameraSelector = true;
-		console.log('showCameraSelector :>> ', showCameraSelector);
 	}}
 >
-	<SwitchCamera
-		onclick={() => {
-			showCameraSelector = true;
-			console.log('showCameraSelector :>> ', showCameraSelector);
-		}}
-	/>
+	<SwitchCamera />
 </Button>
 
 <Sheet.Root bind:open={showCameraSelector}>
@@ -50,7 +52,7 @@
 			<Sheet.Title>Select Camera</Sheet.Title>
 			<Sheet.Description>Choose a camera for QR code scanning</Sheet.Description>
 		</Sheet.Header>
-		<RadioGroup.Root value={currentCamera} onValueChange={onCameraChange}>
+		<RadioGroup.Root value={currentCamera} {onValueChange}>
 			{#each videoDevices as device}
 				<div class="flex items-center space-x-2">
 					<RadioGroup.Item value={device.label} id={device.id} />

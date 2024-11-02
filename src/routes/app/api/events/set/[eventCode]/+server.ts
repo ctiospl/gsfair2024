@@ -6,10 +6,9 @@ import { auth } from '$lib/server/lucia.js';
 import { LuciaError } from 'lucia';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-	const session = await locals.auth.validate();
-	console.log('session :>> ', session);
-	const { user, sessionId } = session;
-	console.log('user :>> ', user);
+	if (!locals.user) {
+		// show login page
+	}
 	const { eventCode } = params;
 	try {
 		let event = await db
@@ -49,6 +48,6 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		return json(event);
 	} catch (e) {
 		console.log('e :>> ', e);
-		throw error(400, 'DB error');
+		error(400, 'DB error');
 	}
 };

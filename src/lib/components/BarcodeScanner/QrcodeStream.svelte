@@ -52,6 +52,17 @@
 
 	let shouldScan = $derived(cameraSettings.shouldStream && cameraActive);
 
+	async function checkSelectedCamera() {
+		if ($scannerSettings.selectedCamera !== undefined) {
+			currentCamera = $scannerSettings.selectedCamera;
+			const devices = await getDevices();
+			const selectedDevice = devices.find((device) => device.label === currentCamera);
+			if (selectedDevice) {
+				cameraSettings.constraints = { deviceId: selectedDevice.deviceId };
+			}
+		}
+	}
+
 	// Props watchers
 	$effect(() => {
 		if (JSON.stringify(constraints) !== JSON.stringify(constraintsCached)) {
@@ -141,6 +152,7 @@
 					await cameraController.stop();
 				}
 			} catch (error) {
+				console.log('error handleCameraSettings :>> ', error);
 				onError(error as Error);
 			}
 		} else {
@@ -156,16 +168,29 @@
 	}
 
 	async function handleCameraChange(label: string) {
-		const devices = await getDevices();
-		const selectedDevice = devices.find((device) => device.label === label);
-		if (selectedDevice) {
-			cameraSettings.constraints = { deviceId: selectedDevice.deviceId };
-			$scannerSettings.selectedCamera = selectedDevice.deviceId;
+		showCameraSelector = false;
+		try {
+			const devices = await getDevices();
+			// console.log('devices :>> ', devices);
+			const selectedDevice = devices.find((device) => device.label === label);
+			if (selectedDevice) {
+				cameraSettings.constraints = { deviceId: selectedDevice.deviceId };
+				$scannerSettings.selectedCamera = selectedDevice.label;
+				console.log('cameraSettings :>> ', cameraSettings);
+
+				await StopCamera();
+				await handleCameraSettings(cameraSettings);
+				await setScanningFormats(formatsCached);
+				await startScanning();
+			}
+		} catch (error) {
+			console.log('error handleCameraChange:>> ', error);
+			cameraSettings.constraints = { facingMode: 'environment' };
 			await StopCamera();
 			await handleCameraSettings(cameraSettings);
 			await setScanningFormats(formatsCached);
 			await startScanning();
-			showCameraSelector = false;
+			console.log('cameraSettings :>> ', cameraSettings);
 		}
 	}
 
@@ -205,6 +230,7 @@
 	$effect(() => {
 		if (!isMounted) return;
 		(async () => {
+			await checkSelectedCamera();
 			await handleCameraSettings(cameraSettings);
 			if (autostart) {
 				await startScanning();
@@ -213,17 +239,21 @@
 	});
 
 	async function startScanning() {
-		clearCanvas(pauseFrameCanvas);
-		clearCanvas(trackingLayerCanvas);
+		try {
+			clearCanvas(pauseFrameCanvas);
+			clearCanvas(trackingLayerCanvas);
 
-		const scanInterval = track === undefined ? 500 : 40;
+			const scanInterval = track === undefined ? 500 : 40;
 
-		keepScanning(videoEl, {
-			detectHandler: (detectedCodes: DetectedBarcode[]) => onDetect({ detail: detectedCodes }),
-			formats: formatsCached,
-			locateHandler: onLocate,
-			minDelay: scanInterval
-		});
+			keepScanning(videoEl, {
+				detectHandler: (detectedCodes: DetectedBarcode[]) => onDetect({ detail: detectedCodes }),
+				formats: formatsCached,
+				locateHandler: onLocate,
+				minDelay: scanInterval
+			});
+		} catch (error) {
+			console.log('error startScanning :>> ', error);
+		}
 	}
 </script>
 

@@ -2,7 +2,10 @@ import { error, json } from '@sveltejs/kit';
 import { db, log, sqlString } from '$lib/server/db.js';
 import { sql } from 'kysely';
 
-export const GET = async ({ params }) => {
+export const GET = async ({ params, locals }) => {
+    if (!locals.user) {
+			// show login page
+    }
 	const { uid } = params;
 	if (uid) {
 

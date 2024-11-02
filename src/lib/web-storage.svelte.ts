@@ -3,19 +3,23 @@ import { web_storage } from 'svelte-web-storage'
 interface scannersSettingsType {
 	selectedCamera: string | undefined;
 	zoomLevel: number;
+    formats: string[];
 }
 interface eventType {
+    event_code: string | undefined;
     event_name: string | undefined;
-    event_id: string | undefined;
+    since: number | undefined;
 }
 export const scannerSettings = web_storage<scannersSettingsType>('scannerSettings', {
 	selectedCamera: undefined,
-	zoomLevel: 2
+	zoomLevel: 2,
+    formats: ['QR_CODE']
 });
 
-export const event = web_storage<eventType>('event', {
-	event_name: undefined,
-	event_id: undefined
+export const eventLS = web_storage<eventType>('eventLS', {
+	event_code: '',
+    event_name: '',
+    since: 0,
 });
 
 // export let scannerSettings = {

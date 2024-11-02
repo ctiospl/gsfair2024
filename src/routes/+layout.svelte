@@ -8,13 +8,17 @@
 
 	import FakeProgressBar from '$lib/components/FakeProgressBar.svelte';
 	import PopupQrScanner from '$lib/components/PopupQrScanner.svelte';
+	import PopupRoute from '$lib/components/PopupRoute.svelte';
 	import Preloader from '$lib/components/Preloader.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import {
 		QrScannerTitle,
 		QrScannerOnScan,
 		QrScannerAutostart,
 		PopupQrScannerOpened,
-		LoadingDialog
+		LoadingDialog,
+		ConfirmDialogProps,
+		PopupRouteProps
 	} from '$lib/ui-item-states.svelte';
 
 	// const { children } = $props();
@@ -59,7 +63,16 @@
 
 	$effect(() => {
 		if (!$page.state.popupQrScannerOpened) {
-			PopupQrScannerOpened.value = false;
+			// PopupQrScannerOpened.value = false;
+			// if ($page.state.popupQrScannerOpened) {
+			// 	history.back();
+			// }
+		}
+		if (!$page.state.popupRouteOpened) {
+			// PopupRouteProps.open = false;
+			// if ($page.state.popupRouteOpened) {
+			// 	history.back();
+			// }
 		}
 	});
 </script>
@@ -67,12 +80,22 @@
 <div class="!h-dvh !min-h-dvh">
 	{@render children()}
 	<Toaster position="top-center" closeButton={notificationWithButton} />
+
+	<ConfirmDialog
+		bind:open={ConfirmDialogProps.open}
+		title={ConfirmDialogProps.title}
+		description={ConfirmDialogProps.description}
+		onConfirm={ConfirmDialogProps.onConfirm}
+		onCancel={ConfirmDialogProps.onCancel}
+	/>
+
+	<FakeProgressBar />
+
+	<PopupQrScanner
+		onScanSuccess={QrScannerOnScan.value}
+		scannerTitle={QrScannerTitle.value}
+		autostart={QrScannerAutostart.value}
+	/>
+	<PopupRoute />
 	<Preloader bind:open={LoadingDialog.value} />
 </div>
-<FakeProgressBar />
-
-<PopupQrScanner
-	onScanSuccess={QrScannerOnScan.value}
-	scannerTitle={QrScannerTitle.value}
-	autostart={QrScannerAutostart.value}
-/>
