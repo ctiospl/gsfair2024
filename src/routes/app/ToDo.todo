@@ -1,0 +1,22 @@
+Routes:
+    ☐ Admin
+        ☐ Approvals
+    ☐ Balance Transfer
+    ☐ Cash Transfer
+    ☐ Cash Issue
+    ☐ Cash Settlement
+    ☐ Check Balance @started(24-10-29 21:35)
+    ☐ Collect Payment
+    ☐ Event Selector
+    ☐ Expenses
+    ☐ Get QR Code
+    ☐ Members
+    ☐ Recharge QR Code
+    ☐ refund-issue
+    ☐ reports
+    ☐ search-visitors
+    ☐ show-balance
+    ☐ show-cash-balance
+    ☐ sos
+    ☐ visitor-registration
+    ☐ volunteer-transactions

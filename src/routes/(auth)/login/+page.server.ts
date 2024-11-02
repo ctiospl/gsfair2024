@@ -35,7 +35,7 @@ export const actions: Actions = {
 				.select(['id', 'username', 'firstname', 'lastname', 'approved', 'password_hash'])
 				.where('username', '=', form.data.username)
 				.limit(1)
-				// .$call(sqlString)
+				.$call(sqlString)
 				.executeTakeFirstOrThrow();
 			const isApproved = existingUser.approved;
 			if (!isApproved) {

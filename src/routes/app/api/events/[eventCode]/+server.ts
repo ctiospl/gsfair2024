@@ -3,15 +3,17 @@ import { db, log } from '$lib/server/db.js';
 import { jsonArrayFrom } from '$lib/server/kyselyhelpers.js';
 import { json, error } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
+	if (!locals.user) {
+		// show login page
+	}
 	const { eventCode } = params;
 	try {
 		let event = await db
 			.selectFrom('category_events as ce')
 			.where('ce.event_code', '=', eventCode)
-            .selectAll('ce')
+			.selectAll('ce')
 			.select((eb) => [
-
 				jsonArrayFrom(
 					eb
 						.selectFrom('event_items as ei')
@@ -22,10 +24,10 @@ export const GET: RequestHandler = async ({ params }) => {
 			])
 			// .$call(log)
 			.executeTakeFirstOrThrow();
-            // console.log('event :>> ', event);
+		// console.log('event :>> ', event);
 		return json(event);
 	} catch (e) {
-        console.log('e :>> ', e);
+		console.log('e :>> ', e);
 		throw error(400, 'DB error');
 	}
 };

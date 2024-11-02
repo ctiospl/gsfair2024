@@ -35,7 +35,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	import { event } from '$lib/web-storage.svelte';
+	import { eventLS } from '$lib/web-storage.svelte';
 
 	import {
 		LeftMenuPanel,
@@ -71,8 +71,8 @@
 		{
 			title: 'Collect ₹/Scan QR',
 			icon: QrCode,
-
-			url: `/app/collect-payment?scannerOpened=true`
+			url: `/app/collect-payment/${$eventLS.event_code}`
+			// visible: CurrentEvent.id !== 0
 		},
 		{
 			title: 'Check Balance',
@@ -228,7 +228,7 @@
 	<Sheet.Trigger></Sheet.Trigger>
 	<Sheet.Content side="left" class="no-scrollbar m-0 p-0 sm:max-w-xs">
 		<ScrollArea class="no-scrollbar m-0 h-full w-full p-0">
-			<nav class="grid gap-6 text-lg font-medium">
+			<nav class="grid gap-6">
 				<div class="flex justify-between">
 					<button
 						class="group flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-primary-foreground md:text-base"
@@ -245,33 +245,36 @@
 				</div>
 
 				<Button
-					class="ml-4 w-[90%] !bg-black"
+					class="ml-4 w-[90%]"
 					onclick={async () => {
+						goto(`/app/event-selector`);
 						QrScannerTitle.value = 'Scan Event QR Code';
-						QrScannerOnScan.value = await UpdateSelectedEvent;
-						QrScannerAutostart.value = false;
-						PopupQrScannerOpened.value = true;
+						// QrScannerOnScan.value = await UpdateSelectedEvent;
+						// QrScannerAutostart.value = false;
+						// PopupQrScannerOpened.value = true;
 						LeftMenuPanel.value = false;
 					}}
 				>
 					<FerrisWheel class="mr-2 h-4 w-4" />
-					{$event.event_name ? $event.event_name : 'Select Event'}
+					{$eventLS.event_name ? $eventLS.event_name : 'Select Event'}
 				</Button>
 
 				{#each menuItems as menuItem}
 					{@const Icon = menuItem.icon}
-					<button
-						onclick={() => {
-							LeftMenuPanel.value = false;
-							goto(menuItem.url);
-						}}
-						class="flex items-center gap-4 px-2.5 {$page.route.id === menuItem.url.toLowerCase()
-							? 'text-foregroun'
-							: 'text-muted-foreground hover:text-foreground'} "
-					>
-						<Icon class="h-5 w-5" />
-						{menuItem.title}
-					</button>
+					{#if menuItem.visible !== false}
+						<button
+							onclick={() => {
+								LeftMenuPanel.value = false;
+								goto(menuItem.url);
+							}}
+							class="flex items-center gap-4 px-2.5 {$page.route.id === menuItem.url.toLowerCase()
+								? 'text-foregroun'
+								: 'text-muted-foreground hover:text-foreground'} "
+						>
+							<Icon class="h-5 w-5" />
+							{menuItem.title}
+						</button>
+					{/if}
 				{/each}
 				<button
 					onclick={() => {

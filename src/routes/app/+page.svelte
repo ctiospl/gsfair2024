@@ -6,14 +6,26 @@
 	import { showMessage } from '$lib/flash-messages.svelte';
 
 	// state
-	import { LeftMenuPanel, LoadingDialog } from '$lib/ui-item-states.svelte';
+	import {
+		LeftMenuPanel,
+		LoadingDialog,
+		ConfirmDialogProps,
+		PopupRouteProps
+	} from '$lib/ui-item-states.svelte';
 
 	// components
 	import Navbar from '$lib/components/Navbar.svelte';
+	import StepCounter from '$lib/components/StepCounter.svelte';
 
 	// ui
 	import { LogOut, Menu as MenuIcon } from 'lucide-svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
+
+	let currentValue = $state(0);
+
+	function handleValueChange(newValue: number) {
+		currentValue = newValue;
+	}
 </script>
 
 <Navbar title="GS Fair 2024">
@@ -35,10 +47,12 @@
 
 <Button
 	onclick={async () => {
-		LoadingDialog.value = true;
-		setTimeout(() => {
-			LoadingDialog.value = false;
-			showMessage(page, { type: 'success', text: 'Scanning QR Code' });
-		}, 3000);
+		PopupRouteProps.route = '/src/routes/app/event-selector/+page.svelte';
+		PopupRouteProps.open = true;
+		PopupRouteProps.title = 'Event Selector';
 	}}>Scan QR Code</Button
 >
+
+<StepCounter bind:value={currentValue} />
+
+<p>Current value: {currentValue}</p>

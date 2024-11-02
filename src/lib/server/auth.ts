@@ -27,7 +27,7 @@ export const lucia = new Lucia(adapter, {
             approved: data.approved
 		};
 	},
-	sessionExpiresIn: new TimeSpan(15, 'm')
+	sessionExpiresIn: new TimeSpan(2, 'h')
 });
 
 
