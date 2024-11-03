@@ -1,12 +1,17 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	let { open = $bindable(false) } = $props();
+	let { open = $bindable(false), text = '' } = $props();
 </script>
 
 <AlertDialog.Root bind:open>
 	<AlertDialog.Content
 		class="!z-50 flex !min-h-full !min-w-full items-center justify-center bg-transparent"
 	>
+		<AlertDialog.Header
+			class="absolute top-32 flex w-full items-center justify-center text-center text-white"
+		>
+			<AlertDialog.Title class="2xl">{text}</AlertDialog.Title>
+		</AlertDialog.Header>
 		<div class="animate-spin text-primary/60">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"

@@ -62,7 +62,11 @@ export function log<T extends Compilable>(qb: T): T {
 
 export function sqlString<T extends Compilable>(qb: T): T {
 	console.log(
-		highlight(format(dangerouslyHydrateSQLParameters(qb.compile().sql, qb.compile().parameters)))
+		highlight(
+			format(dangerouslyHydrateSQLParameters(qb.compile().sql, qb.compile().parameters), {
+				language: 'mariadb'
+			})
+		)
 	);
 
 	return qb;

@@ -3,7 +3,8 @@ export type LeftMenuPanelType = {
 };
 
 export type LoadingDialogType = {
-	value: boolean;
+	open: boolean;
+	text: string;
 };
 
 export type CashBalanceType = {
@@ -53,7 +54,7 @@ export type ConfirmDialogType = {
 };
 
 export let LeftMenuPanel: LeftMenuPanelType = $state({ value: false });
-export let LoadingDialog: LoadingDialogType = $state({ value: false });
+export let LoadingDialog: LoadingDialogType = $state({ open: false, text: '' });
 export let CashBalance: CashBalanceType = $state({ value: 0 });
 export let CurrentEvent: CurrentEventType = $state({
 	id: 0,
@@ -85,3 +86,5 @@ export let PopupRouteProps = $state({
     title: '',
     open: false
 })
+
+export let selectedCameraId = $state({value:''});

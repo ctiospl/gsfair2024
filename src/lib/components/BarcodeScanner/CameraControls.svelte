@@ -27,10 +27,10 @@
 	} = $props<Props>();
 
 	async function onValueChange(value: string) {
-		LoadingDialog.value = true;
+		LoadingDialog.open = true;
 		await onCameraChange(value);
 		showCameraSelector = false;
-		LoadingDialog.value = false;
+		LoadingDialog.open = false;
 	}
 
 	const TorchIcon = $derived(torchOn ? Lightbulb : LightbulbOff);

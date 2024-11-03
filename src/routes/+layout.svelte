@@ -15,11 +15,11 @@
 		QrScannerTitle,
 		QrScannerOnScan,
 		QrScannerAutostart,
-		PopupQrScannerOpened,
 		LoadingDialog,
-		ConfirmDialogProps,
-		PopupRouteProps
+		ConfirmDialogProps
 	} from '$lib/ui-item-states.svelte';
+	import { scannerSettings } from '$lib/web-storage.svelte';
+	import { selectedCameraId } from '$lib/ui-item-states.svelte';
 
 	// const { children } = $props();
 
@@ -60,25 +60,56 @@
 			$flash = undefined;
 		}
 	});
+	$effect.pre(async () => {
+		await listDevices();
+	});
+	async function listDevices() {
+		let mediaStream = null;
+		try {
+			// Start the camera and microphone to get permission
+			mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-	$effect(() => {
-		if (!$page.state.popupQrScannerOpened) {
-			// PopupQrScannerOpened.value = false;
-			// if ($page.state.popupQrScannerOpened) {
-			// 	history.back();
-			// }
+			// Enumerate devices
+			const devices = await navigator.mediaDevices.enumerateDevices();
+
+			devices.forEach((device) => {
+				// Check if the device is an audio input or video input
+				if ($scannerSettings.selectedCamera == device.label) {
+					selectedCameraId.value = device.deviceId;
+				}
+			});
+		} catch (error) {
+			console.error('Error accessing devices:', error);
+		} finally {
+			// Stop the media tracks to turn off the camera and microphone
+			if (mediaStream) {
+				mediaStream.getTracks().forEach((track) => track.stop());
+			}
 		}
-		if (!$page.state.popupRouteOpened) {
-			// PopupRouteProps.open = false;
-			// if ($page.state.popupRouteOpened) {
-			// 	history.back();
-			// }
+	}
+
+	$effect(async () => {
+		if (!LoadingDialog.value) {
+			LoadingDialog.text = '';
 		}
+		// if (!$page.state.popupQrScannerOpened) {
+		// 	// PopupQrScannerOpened.value = false;
+		// 	// if ($page.state.popupQrScannerOpened) {
+		// 	// 	history.back();
+		// 	// }
+		// }
+		// if (!$page.state.popupRouteOpened) {
+		// 	// PopupRouteProps.open = false;
+		// 	// if ($page.state.popupRouteOpened) {
+		// 	// 	history.back();
+		// 	// }
+		// }
 	});
 </script>
 
 <div class="!h-dvh !min-h-dvh">
 	{@render children()}
+
 	<Toaster position="top-center" closeButton={notificationWithButton} />
 
 	<ConfirmDialog
@@ -89,6 +120,7 @@
 		onCancel={ConfirmDialogProps.onCancel}
 	/>
 
+	<PopupRoute />
 	<FakeProgressBar />
 
 	<PopupQrScanner
@@ -96,6 +128,5 @@
 		scannerTitle={QrScannerTitle.value}
 		autostart={QrScannerAutostart.value}
 	/>
-	<PopupRoute />
-	<Preloader bind:open={LoadingDialog.value} />
+	<Preloader bind:open={LoadingDialog.open} />
 </div>

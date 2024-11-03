@@ -22,12 +22,12 @@
 		validators: zodClient(loginSchema),
 		resetForm: false,
 		onSubmit: () => {
-			LoadingDialog.value = true;
+			LoadingDialog.open = true;
 
 			// do something
 		},
 		onResult(event) {
-			LoadingDialog.value = false;
+			LoadingDialog.open = false;
 		},
 
 		onError: (e: unknown) => {

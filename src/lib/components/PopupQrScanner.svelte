@@ -8,7 +8,9 @@
 	import QrcodeStream from '$lib/components/BarcodeScanner/QrcodeStream.svelte';
 	import { tick } from 'svelte';
 	import { X } from 'lucide-svelte';
+	import { selectedCameraId } from '$lib/ui-item-states.svelte';
 	import { page } from '$app/stores';
+	import { showMessage } from '$lib/flash-messages.svelte';
 	let closeButtonRef: HTMLButtonElement;
 
 	let {
@@ -21,7 +23,7 @@
 
 	let result = $state('');
 	let error = $state('');
-	let selectedConstraints = $state({ facingMode: 'environment' });
+	let selectedConstraints = $state({ deviceId: selectedCameraId.value });
 	let qrcodeStream;
 	let barcodeFormats = $state({
 		aztec: false,
@@ -135,17 +137,14 @@
 	let trackFunctionSelected = $state(trackFunctionOptions[5]);
 
 	async function onDetect(event) {
+		console.log('event', event);
+		PopupQrScannerOpened.value = false;
 		const detectedCodes = event.detail;
-
-		if (detectedCodes.length > 1) {
-			// TODO: alert error too many qrcodes... try again
-			PopupQrScannerOpened.value = false;
-		} else {
-			if (detectedCodes[0].rawValue != '') {
-				PopupQrScannerOpened.value = false;
-				return onScanSuccess(detectedCodes[0].rawValue);
-			}
+		if ('error' in detectedCodes) {
+			showMessage(page, { type: 'error', text: detectedCodes.error });
+			return;
 		}
+		return onScanSuccess(detectedCodes[0].rawValue);
 	}
 	let isCameraReady = $state(false);
 
@@ -184,6 +183,9 @@
 					await qrcodeStream.StartCamera();
 				}
 			}
+			// else {
+			// 	await qrcodeStream.StopCamera();
+			// }
 		}
 	});
 	$effect(async () => {

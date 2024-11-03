@@ -15,12 +15,12 @@
 	const form = superForm(data, {
 		validators: zodClient(resetAuthSchema),
 		onSubmit: () => {
-			LoadingDialog.value = true;
+			LoadingDialog.open = true;
 
 			// do something
 		},
 		onResult(event) {
-			LoadingDialog.value = false;
+			LoadingDialog.open = false;
 		},
 
 		onError: (e: unknown) => {
