@@ -3,12 +3,12 @@
 
 	// lib/functions
 	import { page } from '$app/stores';
-	import { afterNavigate } from '$app/navigation';
 	import { showMessage } from '$lib/flash-messages.svelte';
 
 	// components
 	import Button from '$lib/components/ui/button/button.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import { onMount } from 'svelte';
 
 	// ui
 	import { Menu, QrCode } from 'lucide-svelte';
@@ -19,34 +19,38 @@
 
 	let balance = $state(0);
 	let name = $state('');
+	let qrcode = $state('');
 
 	$effect(async () => {
 		QrScannerTitle.value = 'Visitor Check QR Balance';
 		QrScannerOnScan.value = await CheckVisitorBalance;
-		QrScannerAutostart.value = true;
-		// PopupQrScannerOpened.value = true;
+
+		return () => {
+			QrScannerTitle.value = '';
+			QrScannerOnScan.value = async () => {};
+		};
 	});
-	afterNavigate(async () => {
-		PopupQrScannerOpened.value = true;
-	});
+
+	// $effect(async () => {
+	// 	QrScannerTitle.value = 'Visitor Check QR Balance';
+	// 	QrScannerOnScan.value = await CheckVisitorBalance;
+	// });
 
 	async function CheckVisitorBalance(uid: string) {
-		const formData = new FormData();
-		formData.append('uid', uid);
-
-		LoadingDialog.value = true;
-
+		console.log('CheckVisitorBalance');
+		LoadingDialog.open = true;
+		// QrScannerOnScan.value = async () => {};
 		const res = await fetch(`/app/api/qrcode/get-balance/${uid}`);
 		const data = await res.json();
-
-		LoadingDialog.value = false;
-
+		LoadingDialog.open = false;
+		// QrScannerOnScan.value = await CheckVisitorBalance;
 		if ('error' in data) {
+			LoadingDialog.open = false;
 			return showMessage(page, { type: 'error', text: data.message });
 		}
-
 		balance = data.balance_amount;
 		name = data.name;
+		qrcode = uid;
 	}
 </script>
 
@@ -70,21 +74,26 @@
 	{/snippet}
 </Navbar>
 
-<div class="flex h-dvh flex-col">
+<div class="flex h-[calc(100dvh-5rem)] flex-col">
 	{#if name}
 		<div class="flex flex-1 items-center justify-center">
-			<h2 class="text-3xl font-bold">{name}</h2>
+			<div class="flex flex-col items-center justify-center">
+				<p class="text-2xl">Visitor-QrCode</p>
+				<p class="text-3xl font-bold">{name}-({qrcode})</p>
+			</div>
 		</div>
 
 		<div class="flex flex-1 items-center justify-center">
-			<p class="text-2xl">QrCode Balance</p>
-			<p class="text-3xl font-bold">₹ {balance}</p>
+			<div class="flex flex-col items-center justify-center">
+				<p class="text-2xl">QrCode Balance</p>
+				<p class="text-3xl font-bold">₹ {balance}</p>
+			</div>
 		</div>
 	{:else}
 		<div class="flex flex-1 items-center justify-center">
 			<div class="flex flex-col items-center justify-center">
 				<p class="pb-8 text-center text-3xl">
-					Please scan the QR Code of the visitor <br />to check their Balance
+					Scan the visitor's QR Code <br />to check their Balance
 				</p>
 
 				<Button

@@ -47,9 +47,7 @@
 
 <Button
 	onclick={async () => {
-		PopupRouteProps.route = '/src/routes/app/event-selector/+page.svelte';
-		PopupRouteProps.open = true;
-		PopupRouteProps.title = 'Event Selector';
+		LoadingDialog.open = true;
 	}}>Scan QR Code</Button
 >
 

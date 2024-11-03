@@ -5,10 +5,11 @@ import { jsonBuildArrayObject, jsonArrayFrom } from '$lib/server/kyselyhelpers';
 import { sql } from 'kysely';
 
 export const load = (async ({ locals }) => {
-	const session = await locals.auth.validate();
-	const { user } = session;
-    console.log('user :>> ', user);
-	const volunteer_id = user.userId;
+    if (!locals.user) {
+        // show login page
+    }
+
+	const volunteer_id = locals.user.id;
     const transactions = await db
 			.selectFrom('transaction_log as tl')
 			.leftJoin('visitor_registration as vr', 'vr.id', 'tl.visitor_id')

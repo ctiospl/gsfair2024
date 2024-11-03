@@ -256,7 +256,9 @@
 					}}
 				>
 					<FerrisWheel class="mr-2 h-4 w-4" />
-					{$eventLS.event_name ? $eventLS.event_name : 'Select Event'}
+					{$eventLS.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60
+						? $eventLS.event_name
+						: 'Select Event'}
 				</Button>
 
 				{#each menuItems as menuItem}

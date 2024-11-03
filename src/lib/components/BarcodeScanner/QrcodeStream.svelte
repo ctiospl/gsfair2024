@@ -7,6 +7,7 @@
 	import { assert } from './util';
 	import { scannerSettings } from '$lib/web-storage.svelte';
 	import CameraControls from './CameraControls.svelte';
+	import { selectedCameraId } from '$lib/ui-item-states.svelte';
 
 	type Point = {
 		x: number;
@@ -53,13 +54,8 @@
 	let shouldScan = $derived(cameraSettings.shouldStream && cameraActive);
 
 	async function checkSelectedCamera() {
-		if ($scannerSettings.selectedCamera !== undefined) {
-			currentCamera = $scannerSettings.selectedCamera;
-			const devices = await getDevices();
-			const selectedDevice = devices.find((device) => device.label === currentCamera);
-			if (selectedDevice) {
-				cameraSettings.constraints = { deviceId: selectedDevice.deviceId };
-			}
+		if (selectedCameraId.value != '') {
+			cameraSettings.constraints = { deviceId: selectedCameraId.value };
 		}
 	}
 
@@ -143,8 +139,14 @@
 				if (isMounted) {
 					const devices = await navigator.mediaDevices.enumerateDevices();
 					videoDevices = devices.filter(({ kind }) => kind === 'videoinput');
-					currentCamera =
-						videoDevices.find((device) => device.deviceId === capabilities.deviceId)?.label ?? '';
+					const currentCameraDevice = videoDevices.find(
+						(device) => device.deviceId === capabilities.deviceId
+					);
+					if (currentCameraDevice) {
+						currentCamera = currentCameraDevice.label;
+						selectedCameraId.value = currentCameraDevice.deviceId;
+					}
+
 					cameraActive = true;
 					torchSupport = capabilities?.torch ?? false;
 					onCameraOn(capabilities);
@@ -175,6 +177,7 @@
 			const selectedDevice = devices.find((device) => device.label === label);
 			if (selectedDevice) {
 				cameraSettings.constraints = { deviceId: selectedDevice.deviceId };
+				selectedCameraId.value = selectedDevice.deviceId;
 				$scannerSettings.selectedCamera = selectedDevice.label;
 				console.log('cameraSettings :>> ', cameraSettings);
 
@@ -226,15 +229,28 @@
 		cameraController.stop();
 	});
 
+	async function onDetectForward(event) {
+		const detectedCodes = event.detail;
+
+		if (detectedCodes.length > 1) {
+			// TODO: alert error too many qrcodes... try again
+			await cameraController.stop();
+			return onDetect({ ...event, error: 'More than one code detected' });
+		} else {
+			if (detectedCodes[0].rawValue != '') {
+				await cameraController.stop();
+				return onDetect(event);
+			}
+		}
+	}
+
 	// Camera settings effect
 	$effect(() => {
 		if (!isMounted) return;
 		(async () => {
 			await checkSelectedCamera();
 			await handleCameraSettings(cameraSettings);
-			if (autostart) {
-				await startScanning();
-			}
+			await startScanning();
 		})();
 	});
 
@@ -246,7 +262,8 @@
 			const scanInterval = track === undefined ? 500 : 40;
 
 			keepScanning(videoEl, {
-				detectHandler: (detectedCodes: DetectedBarcode[]) => onDetect({ detail: detectedCodes }),
+				detectHandler: (detectedCodes: DetectedBarcode[]) =>
+					onDetectForward({ detail: detectedCodes }),
 				formats: formatsCached,
 				locateHandler: onLocate,
 				minDelay: scanInterval

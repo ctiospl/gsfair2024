@@ -17,52 +17,43 @@
 	import {
 		QrScannerTitle,
 		QrScannerOnScan,
-		QrScannerAutostart,
-		CurrentEvent
+		CurrentEvent,
+		LeftMenuPanel,
+		PopupQrScannerOpened,
+		LoadingDialog
 	} from '$lib/ui-item-states.svelte';
-	import { LeftMenuPanel, PopupQrScannerOpened, LoadingDialog } from '$lib/ui-item-states.svelte';
-
-	let balance = $state(0);
-	let name = $state('');
+	import { eventLS } from '$lib/web-storage.svelte';
 
 	$effect(async () => {
 		QrScannerTitle.value = 'Select Event';
 		QrScannerOnScan.value = await SetEvent;
-		if (!CurrentEvent.id) {
-			QrScannerAutostart.value = true;
+		console.log('$eventLS.event_code :>> ', $eventLS);
+		if ($eventLS.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60) {
+			await SetEvent($eventLS.event_code);
 		}
 	});
-	afterNavigate(async () => {
-		PopupQrScannerOpened.value = true;
-	});
 
-	async function SetEvent(eventCode: string) {
-		LoadingDialog.value = true;
+	async function SetEvent(eventCode: string, resetSince?: false) {
+		LoadingDialog.open = true;
 		const res = await fetch(`/app/api/events/${eventCode}`);
 		const data = await res.json();
 		if ('error' in data) {
-			LoadingDialog.value = false;
+			LoadingDialog.open = false;
 			return showMessage(page, { type: 'error', text: data.message });
 		}
-		try {
-			let res = await fetch(`/app/api/events/set/${eventCode}`);
-			let data = await res.json();
-			if (res.status === 200) {
-				CurrentEvent.id = data.id;
-				CurrentEvent.event_name = data.event_name;
-				CurrentEvent.event_code = data.event_code;
-				CurrentEvent.has_items = data.has_items;
-				CurrentEvent.price = data.price;
-				CurrentEvent.since = (Date.now() / 1000) | 0;
-				CurrentEvent.event_items = data.event_items;
-			}
-			LoadingDialog.value = false;
-		} catch (error) {
-			LoadingDialog.value = false;
-			if ('error' in data) {
-				return showMessage(page, { type: 'error', text: data.message });
-			}
-		}
+		CurrentEvent.id = data.id;
+		CurrentEvent.event_name = data.event_name;
+		CurrentEvent.event_code = data.event_code;
+		CurrentEvent.has_items = data.has_items;
+		CurrentEvent.price = data.price;
+		CurrentEvent.since = (Date.now() / 1000) | 0;
+
+		CurrentEvent.event_items = data.event_items;
+		$eventLS.event_name = data.event_name;
+		$eventLS.event_code = data.event_code;
+		$eventLS.since = CurrentEvent.since;
+		LoadingDialog.open = false;
+		console.log('CurrentEvent :>> ', $state.snapshot(CurrentEvent));
 	}
 </script>
 
@@ -86,27 +77,26 @@
 	{/snippet}
 </Navbar>
 
-<div class="flex h-dvh flex-col">
-	{#if CurrentEvent.event_name}
-		<div class="flex flex-1 items-center justify-center">
-			<h2 class="text-3xl font-bold">Current Event</h2>
-		</div>
-
-		<div class="flex flex-1 items-center justify-center">
-			<p class="text-2xl">{CurrentEvent.event_name}</p>
-		</div>
-	{:else}
+<div class="flex h-[calc(100dvh-5rem)] flex-col">
+	{#if CurrentEvent.event_name && ((Date.now() / 1000) | 0) - CurrentEvent?.since < 3 * 60 * 60}
 		<div class="flex flex-1 items-center justify-center">
 			<div class="flex flex-col items-center justify-center">
-				<p class="pb-8 text-center text-3xl">
-					Please scan the Event QR Code to {CurrentEvent.event_name ? 'change' : 'select'} the event
-				</p>
-
-				<Button
-					class="h-24 px-6 text-4xl [&_svg]:size-10"
-					onclick={() => (PopupQrScannerOpened.value = true)}><QrCode /> Scan QR Code</Button
-				>
+				<h2 class="text-3xl font-bold">Current Event</h2>
+				<p class="text-3xl">{CurrentEvent.event_name}</p>
+				<p class="text-3xl">₹ {CurrentEvent.price}</p>
 			</div>
 		</div>
 	{/if}
+	<div class="flex flex-1 items-center justify-center">
+		<div class="flex flex-col items-center justify-center">
+			<p class="pb-8 text-center text-3xl">
+				Scan the Event QR Code to {CurrentEvent.event_name ? 'Change' : 'Select'} the event
+			</p>
+
+			<Button
+				class="h-24 px-6 text-4xl [&_svg]:size-10"
+				onclick={() => (PopupQrScannerOpened.value = true)}><QrCode /> Scan QR Code</Button
+			>
+		</div>
+	</div>
 </div>
