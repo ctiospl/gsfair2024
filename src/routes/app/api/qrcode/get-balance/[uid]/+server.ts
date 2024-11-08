@@ -6,7 +6,7 @@ import { sql } from 'kysely';
 
 export const GET = async ({ params, locals }) => {
     if (!locals.user) {
-        // show login page
+        error(401, 'Please login first');
     }
     const { uid } = params;
     if (uid) {
@@ -28,7 +28,7 @@ export const GET = async ({ params, locals }) => {
                     eb
                         .selectFrom('transaction_log')
                         .whereRef('visitor_id', '=', 'vr.id')
-                        .select((eb) => eb.fn('ifnull', [eb.fn.sum('trx_amount'), sql`0`]))
+                        .select((eb) => eb.fn('ifnull', [eb.fn.sum('trx_amount'), sql`0`]).as('balance_amount'))
                         .as('balance_amount')
                 )
                 .select((eb) =>
@@ -44,7 +44,7 @@ export const GET = async ({ params, locals }) => {
                     eb
                         .selectFrom('transaction_log')
                         .whereRef('visitor_id', '=', 'vr.master_user_id')
-                        .select((eb) => eb.fn('ifnull', [eb.fn.sum('trx_amount'), sql`0`]))
+                        .select((eb) => eb.fn('ifnull', [eb.fn.sum('trx_amount'), sql`0`]).as('balance_amount'))
                         .as('master_balance_amount')
                 )
                 .select((eb) =>
