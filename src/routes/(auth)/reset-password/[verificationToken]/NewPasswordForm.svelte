@@ -1,8 +1,7 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { Input } from '$lib/components/ui/input';
 	import PasswordInput from '$lib/components/ui/password-input/password-input.svelte';
-	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
+	import { Control, Field, FieldErrors, Label } from 'formsnap';
 
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
 	import { newPasswordSchema } from '$lib/zod/schema.js';
@@ -35,29 +34,31 @@
 
 <form method="POST" use:enhance>
 	<Field {form} name="password">
-		<Control let:attrs>
-			<Label>Password</Label>
-			<PasswordInput
-				{...attrs}
-				autocapitalize="off"
-				type="password"
-				bind:value={$formData.password}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Password</Label>
+				<PasswordInput
+					{...props}
+					autocapitalize="off"
+					type="password"
+					bind:value={$formData.password}
+				/>
+			{/snippet}
 		</Control>
-		<!-- <Description>OMS Password.</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 	<Field {form} name="confirmPassword">
-		<Control let:attrs>
-			<Label>Confirm Password</Label>
-			<PasswordInput
-				{...attrs}
-				autocapitalize="off"
-				type="password"
-				bind:value={$formData.confirmPassword}
-			/>
+		<Control>
+			{#snippet children({ props })}
+				<Label>Confirm Password</Label>
+				<PasswordInput
+					{...props}
+					autocapitalize="off"
+					type="password"
+					bind:value={$formData.confirmPassword}
+				/>
+			{/snippet}
 		</Control>
-		<!-- <Description>OMS Password.</Description> -->
 		<FieldErrors class="text-xs italic text-red-500" />
 	</Field>
 

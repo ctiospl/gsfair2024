@@ -2,7 +2,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import PasswordInput from '$lib/components/ui/password-input/password-input.svelte';
-	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
+	import { Control, Field, FieldErrors, Label } from 'formsnap';
 
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
 	import { authSchema } from '$lib/zod/schema.js';
@@ -105,14 +105,10 @@
 					autocorrect="off"
 					bind:value={$formData.phone}
 					onkeyup={(e) => {
-						if (e?.target?.value) {
-							e.target.value = cleanPhoneNumber(e.target.value);
+						const target = e.target as HTMLInputElement;
+						if (target?.value) {
+							target.value = cleanPhoneNumber(target.value);
 						}
-						// console.log('e.taget.value :>> ', e.taget.value);
-						// // console.log('e.key :>> ', e.key);
-						// if (e.key === ' ') {
-						// 	e.preventDefault();
-						// }
 					}}
 				/>
 			{/snippet}

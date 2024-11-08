@@ -1,21 +1,16 @@
 <script lang="ts">
-	// lib
-	import { type Infer, type SuperValidated, superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
-
-	// components
-
-	// ui
-	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import PasswordInput from '$lib/components/ui/password-input/password-input.svelte';
-	import { Button } from '$lib/components/ui/button';
-	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { Control, Description, Field, FieldErrors, Label } from 'formsnap';
 
-	// state
 	import { LoadingDialog } from '$lib/ui-item-states.svelte';
 	import { loginSchema } from '$lib/zod/schema.js';
+	import { type Infer, type SuperValidated, superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
+
+	import { Button } from '$lib/components/ui/button';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	export let data: SuperValidated<Infer<typeof loginSchema>>;
 	const form = superForm(data, {
@@ -49,7 +44,7 @@
 					autocapitalize="off"
 					autocomplete="off"
 					autocorrect="off"
-					bind:value={$formData.email}
+					bind:value={$formData.username}
 				/>
 			{/snippet}
 		</Control>
@@ -60,12 +55,10 @@
 		<Control>
 			{#snippet children({ props })}
 				<Label>Password</Label>
-				<Input
+				<PasswordInput
 					{...props}
-					type="password"
 					autocapitalize="off"
-					autocomplete="off"
-					autocorrect="off"
+					type="password"
 					bind:value={$formData.password}
 				/>
 			{/snippet}
@@ -75,4 +68,8 @@
 	</Field>
 
 	<Form.Button class="mt-8 w-full">Login</Form.Button>
+	<Separator class="mx-auto my-4 w-[90%]" />
+	<Button href="/register" variant="outline" class="w-full">Register</Button>
+	<Separator class="mx-auto my-4 w-[90%]" />
+	<Button href="/reset-password" variant="ghost" class="w-full">Forgot Username or Password</Button>
 </form>

@@ -55,8 +55,9 @@
 					bind:value={$formData.phone}
 					placeholder="e.g. 9823456789"
 					onkeyup={(e) => {
-						if (e?.target?.value) {
-							e.target.value = cleanPhoneNumber(e.target.value);
+						const target = e.target as HTMLInputElement;
+						if (target?.value) {
+							target.value = cleanPhoneNumber(target.value);
 						}
 					}}
 				/>
