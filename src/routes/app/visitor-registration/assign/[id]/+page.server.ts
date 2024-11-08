@@ -13,8 +13,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     }
     const form = await superValidate(zod(assignQrCodeSchema));
     const { id } = params;
-    console.log('id :>> ', id);
-    console.log('isNumeric(id) :>> ', isNumeric(id));
 
     const userData = await db
         .selectFrom('visitor_registration as vr')
@@ -48,7 +46,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         .selectAll('vr')
         .$call(log)
         .execute();
-    console.log('userData :>> ', userData);
+
     return { form, userData };
 };
 
@@ -72,7 +70,7 @@ export const actions: Actions = {
             const timestamp = (Date.now() / 1000) | 0;
             const transactionBuilder = db.transaction();
             const uid_log_id = await transactionBuilder.execute(async (transaction) => {
-                // visitor_uids;
+
                 await transaction
                     .updateTable('visitor_registration')
                     .set({
@@ -91,6 +89,7 @@ export const actions: Actions = {
                     })
                     .returning(['id'])
                     .executeTakeFirstOrThrow();
+
                 return uid_log_id;
             });
 
