@@ -1,22 +1,21 @@
-import { lucia } from '$lib/server/auth';
-import { isWithinExpirationDate } from 'oslo';
+import type { Actions, PageServerLoad } from './$types';
 import { TimeSpan, createDate } from 'oslo';
-import { sha256 } from 'oslo/crypto';
+import { db, sqlString } from '$lib/server/db';
+import { fail, redirect } from '@sveltejs/kit';
+import { message, setError, superValidate } from 'sveltekit-superforms';
+
+import type { Infer } from 'sveltekit-superforms';
+import { ZOHO_SEND_MAIL_TOKEN } from '$env/static/private';
 import { encodeHex } from 'oslo/encoding';
 import { generateIdFromEntropySize } from 'lucia';
-import { fail, redirect } from '@sveltejs/kit';
 import { hash } from '@node-rs/argon2';
-import { superValidate, setError, message } from 'sveltekit-superforms';
-import type { Infer } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { ZOHO_SEND_MAIL_TOKEN } from '$env/static/private';
-
+import { isWithinExpirationDate } from 'oslo';
+import { lucia } from '$lib/server/auth';
 import { newPasswordSchema } from '$lib/zod/schema';
-import { db, sqlString } from '$lib/server/db';
-
-import type { PageServerLoad, Actions } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { sha256 } from 'oslo/crypto';
 import { sql } from 'kysely';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const form = await superValidate(zod(newPasswordSchema));
@@ -78,7 +77,10 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'success',
-					message: 'Password has been changed successfully. Please login.'
+					message: {
+						title: 'Password has been changed successfully',
+						text: 'Please login.'
+					}
 				},
 				cookies
 			);

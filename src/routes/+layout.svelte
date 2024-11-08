@@ -61,9 +61,10 @@
 			$flash = undefined;
 		}
 	});
-	$effect.pre(async () => {
-		await listDevices();
-		// }
+	$effect.pre(() => {
+		(async () => {
+			await listDevices();
+		})();
 	});
 
 	async function listDevices() {
@@ -91,10 +92,12 @@
 		}
 	}
 
-	$effect(async () => {
-		if (!LoadingDialog.value) {
-			LoadingDialog.text = '';
-		}
+	$effect(() => {
+		(async () => {
+			if (!LoadingDialog.open) {
+				LoadingDialog.text = '';
+			}
+		})();
 		// if (!$page.state.popupQrScannerOpened) {
 		// 	// PopupQrScannerOpened.value = false;
 		// 	// if ($page.state.popupQrScannerOpened) {

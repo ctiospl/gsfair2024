@@ -1,17 +1,16 @@
-import { lucia } from '$lib/server/auth';
+import type { Actions, PageServerLoad } from './$types';
+import { db, sqlString } from '$lib/server/db';
 import { fail, redirect } from '@sveltejs/kit';
+import { message, setError, superValidate } from 'sveltekit-superforms';
+
+import type { Infer } from 'sveltekit-superforms';
+import { authSchema } from '$lib/zod/schema';
 import { generateIdFromEntropySize } from 'lucia';
 import { hash } from '@node-rs/argon2';
-import { superValidate, setError, message } from 'sveltekit-superforms';
-import type { Infer } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-
-import { authSchema } from '$lib/zod/schema';
-import { db, sqlString } from '$lib/server/db';
-
-import type { PageServerLoad, Actions } from './$types';
+import { lucia } from '$lib/server/auth';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { sql } from 'kysely';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
@@ -67,7 +66,10 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'success',
-					message: 'User added successfully. Please wait for admin to approve your account.'
+					message: {
+						title: 'User added successfully',
+						text: 'Please wait for admin to approve your account.'
+					}
 				},
 				cookies
 			);
@@ -77,7 +79,13 @@ export const actions: Actions = {
 				console.log('errorX :>> ', error);
 				// setError(form, 'username', 'Invalid credentials');
 				setError(form, 'username', error.message);
-				setFlash({ type: 'error', message: error.message }, cookies);
+				setFlash(
+					{
+						type: 'error',
+						message: { title: 'Error', text: error.message }
+					},
+					cookies
+				);
 			}
 			return { form };
 		}

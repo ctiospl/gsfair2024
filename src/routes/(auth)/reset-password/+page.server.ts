@@ -1,21 +1,20 @@
-import { lucia } from '$lib/server/auth';
+import type { Actions, PageServerLoad } from './$types';
 import { TimeSpan, createDate } from 'oslo';
-import { sha256 } from 'oslo/crypto';
+import { db, sqlString } from '$lib/server/db';
+import { fail, redirect } from '@sveltejs/kit';
+import { message, setError, superValidate } from 'sveltekit-superforms';
+
+import type { Infer } from 'sveltekit-superforms';
+import { ZOHO_SEND_MAIL_TOKEN } from '$env/static/private';
 import { encodeHex } from 'oslo/encoding';
 import { generateIdFromEntropySize } from 'lucia';
-import { fail, redirect } from '@sveltejs/kit';
 import { hash } from '@node-rs/argon2';
-import { superValidate, setError, message } from 'sveltekit-superforms';
-import type { Infer } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { ZOHO_SEND_MAIL_TOKEN } from '$env/static/private';
-
+import { lucia } from '$lib/server/auth';
 import { resetAuthSchema } from '$lib/zod/schema';
-import { db, sqlString } from '$lib/server/db';
-
-import type { PageServerLoad, Actions } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { sha256 } from 'oslo/crypto';
 import { sql } from 'kysely';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
@@ -69,7 +68,10 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'success',
-					message: 'Login instructions have been sent to your registered email.'
+					message: {
+						title: 'Login instructions have been sent',
+						text: 'Please check your email for further instructions.'
+					}
 				},
 				cookies
 			);
@@ -77,7 +79,13 @@ export const actions: Actions = {
 			if (error instanceof Error) {
 				console.log('errorX :>> ', error);
 				// setError(form, 'username', 'Invalid credentials');
-				setFlash({ type: 'error', message: error.message }, cookies);
+				setFlash(
+					{
+						type: 'error',
+						message: { title: 'Error', text: error.message }
+					},
+					cookies
+				);
 			}
 			return { form };
 		}
