@@ -1,8 +1,12 @@
-import type { RequestHandler } from './$types';
 import {db, log} from '$lib/server/db.js';
-import { json, error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({params}) => {
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({params, locals}) => {
+    if (!locals.user) {
+        error(401, 'Please login first');
+    }
     const {id} = params;
     try {
         let {balance} = await db
@@ -15,7 +19,7 @@ export const GET: RequestHandler = async ({params}) => {
         }
         return json({balance});
     } catch (e) {
-        throw error(400, 'DB error');
+        error(400, 'DB error');
     }
 
 };
