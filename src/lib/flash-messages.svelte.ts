@@ -1,5 +1,5 @@
-import { getFlash } from 'sveltekit-flash-message';
 import { page as Page } from '$app/stores';
+import { getFlash } from 'sveltekit-flash-message';
 interface MessageParams {
 	type?: string;
 	title?: string;

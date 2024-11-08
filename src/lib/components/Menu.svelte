@@ -53,8 +53,16 @@
 
 	let popupQrScannerOpened = $state(false);
 	// $inspect($page);
+	let eventCode = $state('');
 
-	$effect(() => {});
+	$effect(() => {
+		console.log('$eventLS :>> ', $eventLS);
+		eventCode =
+			$eventLS?.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60
+				? $eventLS?.event_code
+				: '';
+		console.log('eventCode :>> ', eventCode);
+	});
 	let role = $page.data?.user?.role || 'volunteer';
 
 	async function UpdateSelectedEvent(eventId: number) {
@@ -66,13 +74,12 @@
 		{
 			title: 'Home',
 			icon: Shell,
-			url: `/app`
+			url: () => `/app`
 		},
 		{
 			title: 'Collect ₹/Scan QR',
 			icon: QrCode,
-			url: `/app/collect-payment/${$eventLS.event_code}`
-			// visible: CurrentEvent.id !== 0
+			url: () => `/app/collect-payment/${eventCode}` // visible: CurrentEvent.id !== 0
 		},
 		{
 			title: 'Check Balance',
@@ -80,12 +87,12 @@
 			// icon2: Wallet,
 			// icon3: IndianRupee,
 
-			url: `/app/check-balance`
+			url: () => `/app/check-balance`
 		},
 		{
 			title: 'Transactions',
 			icon: ScrollText,
-			url: `/app/volunteer-transactions`
+			url: () => `/app/volunteer-transactions`
 		}
 	];
 
@@ -93,7 +100,7 @@
 		{
 			title: 'SOS',
 			icon: AlertCircle,
-			url: `/app/sos`
+			url: () => `/app/sos`
 		}
 	];
 	let menuItems: typeof commonMenuItems = $state([]);
@@ -110,17 +117,17 @@
 					icon: Plus,
 					// icon2: IndianRupee,
 					// icon3: Wallet,
-					url: `/recharge-qrcode`
+					url: () => `/recharge-qrcode`
 				},
 				{
 					title: 'Issue Refund(Cash)',
 					icon: IndianRupee,
-					url: `/refund-issue`
+					url: () => `/refund-issue`
 				},
 				{
 					title: 'Balance Transfer',
 					icon: ArrowRight,
-					url: `/balance-transfer`
+					url: () => `/balance-transfer`
 				},
 				...endMenuItems
 			];
@@ -134,12 +141,12 @@
 					icon: Plus,
 					// icon2: IndianRupee,
 					// icon3: Wallet,
-					url: `/app/recharge-qrcode`
+					url: () => `/app/recharge-qrcode`
 				},
 				{
 					title: 'Balance Transfer',
 					icon: ArrowRight,
-					url: `/app/balance-transfer`
+					url: () => `/app/balance-transfer`
 				},
 				...endMenuItems
 			];
@@ -151,24 +158,24 @@
 				{
 					title: 'Visitor Registration',
 					icon: UserPlus,
-					url: `/app/visitor-registration`
+					url: () => `/app/visitor-registration`
 				},
 				{
 					title: 'Search Visitors',
 					icon: Search,
-					url: `/app/search-visitors`
+					url: () => `/app/search-visitors`
 				},
 				{
 					title: 'Add ₹ to QrCode',
 					icon: Plus,
 					// icon2: IndianRupee,
 					// icon3: Wallet,
-					url: `/app/recharge-qrcode`
+					url: () => `/app/recharge-qrcode`
 				},
 				{
 					title: 'Balance Transfer',
 					icon: ArrowRight,
-					url: `/app/balance-transfer`
+					url: () => `/app/balance-transfer`
 				},
 				...endMenuItems
 			];
@@ -180,39 +187,39 @@
 				{
 					title: 'Visitor Registration',
 					icon: UserPlus,
-					url: `/app/visitor-registration`
+					url: () => `/app/visitor-registration`
 				},
 				{
 					title: 'Search Visitors',
 					icon: Search,
-					url: `/app/search-visitors`
+					url: () => `/app/search-visitors`
 				},
 				{
 					title: 'Add ₹ to QrCode',
 					icon: Plus,
 					// icon2: IndianRupee,
 					// icon3: Wallet,
-					url: `/app/recharge-qrcode`
+					url: () => `/app/recharge-qrcode`
 				},
 				{
 					title: 'Balance Transfer',
 					icon: ArrowRight,
-					url: `/app/balance-transfer`
+					url: () => `/app/balance-transfer`
 				},
 				{
 					title: 'Issue Cash(Volunteer)',
 					icon: Plus,
-					url: `/app/cash-issue`
+					url: () => `/app/cash-issue`
 				},
 				{
 					title: 'Cash Settlement',
 					icon: PiggyBank,
-					url: `/app/cash-settlement-collect`
+					url: () => `/app/cash-settlement-collect`
 				},
 				{
 					title: 'Issue Refund(Cash)',
 					icon: IndianRupee,
-					url: `/app/refund-issue`
+					url: () => `/app/refund-issue`
 				},
 				...endMenuItems
 			];
@@ -267,9 +274,9 @@
 						<button
 							onclick={() => {
 								LeftMenuPanel.value = false;
-								goto(menuItem.url);
+								goto(menuItem.url());
 							}}
-							class="flex items-center gap-4 px-2.5 {$page.route.id === menuItem.url.toLowerCase()
+							class="flex items-center gap-4 px-2.5 {$page.route.id === menuItem.url().toLowerCase()
 								? 'text-foregroun'
 								: 'text-muted-foreground hover:text-foreground'} "
 						>

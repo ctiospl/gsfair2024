@@ -8,6 +8,7 @@ interface scannersSettingsType {
 interface eventType {
     event_code: string | undefined;
     event_name: string | undefined;
+    event_id: number;
     since: number | undefined;
 }
 export const scannerSettings = web_storage<scannersSettingsType>('scannerSettings', {
@@ -18,6 +19,7 @@ export const scannerSettings = web_storage<scannersSettingsType>('scannerSetting
 
 export const eventLS = web_storage<eventType>('eventLS', {
 	event_code: '',
+    event_id: 0,
     event_name: '',
     since: 0,
 });

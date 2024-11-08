@@ -138,6 +138,7 @@ export const collectionSchema = z.object({
 	payment_method: z.string(),
 	total_amount: z.number(),
 	guest_id: z.number(),
+    guest_sub_id: z.number(),
 	is_child: z.boolean(),
 	volunteer_id: z.number(),
 	event_id: z.number(),

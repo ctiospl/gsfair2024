@@ -12,9 +12,10 @@
 		inputDisabled = true,
 		height = 11,
 		textSize = '2xl',
-		onPlus = () => {},
-		onMinus = () => {},
-		onValueChange = () => {}
+		onPlus = increment,
+		onMinus = decrement,
+		onValueChange = () => {},
+		...restProps
 	} = $props<{
 		value?: number;
 		min?: number;
@@ -24,6 +25,7 @@
 		inputDisabled?: boolean;
 		height?: number;
 		textSize?: string;
+		class?: string;
 		onPlus?: (value: number) => void;
 		onMinus?: (value: number) => void;
 		onValueChange?: (value: number) => void;
@@ -68,10 +70,10 @@
 	}
 </script>
 
-<div class="relative flex max-w-[8rem] items-center">
+<div class="relative flex items-center {restProps.class}">
 	<Button
 		class="h-{height} rounded-none rounded-s-lg "
-		onclick={decrement}
+		onclick={onMinus}
 		disabled={disabled || value <= min}
 	>
 		<Minus class="h-4 w-4" />
@@ -87,7 +89,7 @@
 		class="h-{height} w-32 rounded-none text-center text-{textSize} [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 	/>
 	<Button
-		onclick={increment}
+		onclick={onPlus}
 		disabled={disabled || value >= max}
 		class="h-{height} rounded-none rounded-e-lg "
 	>
