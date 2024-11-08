@@ -10,6 +10,11 @@ import { sql } from 'kysely';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params, cookies, locals }) => {
+    if (!locals.user) {
+        error(401, 'Please login first');
+    }
+    const volunteer_id = locals.user.id;
+    const event_id = locals.user.current_event_id ?? 0;
     const { eventcode } = params;
     console.log('eventcode :>> ', eventcode);
     if (!eventcode) {
@@ -61,18 +66,18 @@ export const load: PageServerLoad = async ({ params, cookies, locals }) => {
                         'trx_amount',
                         'payment_method',
                         eb.fn("FROM_UNIXTIME", [
-                            eb("trx_ts", "+", sql.raw("5.5 * 60 * 60")),
+                            eb("trx_ts", "+", sql.raw<number>("5.5 * 60 * 60")),
                             sql.lit("%d-%m-%Y %h:%i %p")
                         ]).as("trx_ts")
                     ])
                     .where('event_id', '=', eb.ref('ce.id'))
-                    .where('volunteer_id', '=', locals.user?.id)
+                    .where('volunteer_id', '=', volunteer_id)
                     .orderBy('trx_ts', 'desc')
                     .limit(1)
             )
             .as('last_payment_info')
         ])
-        .$call(sqlString)
+        // .$call(sqlString)
         .executeTakeFirstOrThrow();
 
     console.log('event :>> ', event);
@@ -114,9 +119,9 @@ export const actions: Actions = {
         console.log('locals :>> ', locals);
 
         if (!locals.user) {
-            // show login page
+            error(401, 'Please login first');
         }
-        const volunteer_id = locals.user?.id;
+        const volunteer_id = locals.user.id;
 
         const form = await superValidate(request, zod(collectionSchema));
         console.log('form :>> ', form);
@@ -143,7 +148,7 @@ export const actions: Actions = {
             const new_balance_amount = await transactionBuilder.execute(async (transaction) => {
                 // add recharge amount
 
-                if (recharge_amt > 0) {
+                if (recharge_amt && recharge_amt > 0) {
                     const { id: guest_recharge_id } = await transaction
                         .insertInto('transaction_log')
                         .values({
@@ -159,7 +164,7 @@ export const actions: Actions = {
                         .returning(['id'])
                         .executeTakeFirstOrThrow();
 
-                    if (recharge_payment_method.toLowerCase().trim() == 'cash') {
+                    if (recharge_payment_method && recharge_payment_method.toLowerCase().trim() == 'cash') {
                         await transaction
                             .insertInto('volunteer_cash_log')
                             .values({
@@ -174,13 +179,13 @@ export const actions: Actions = {
                 // check if balance is there
                 const { balance_amount } = await transaction
                     .selectFrom('transaction_log')
-                    .select((eb) => eb.fn('ifnull', [eb.fn.sum('trx_amount'), sql`0`]).as('balance_amount'))
+                    .select((eb) => eb.fn<number>('ifnull', [eb.fn.sum('trx_amount'), sql`0`]).as('balance_amount'))
                     .where('visitor_id', '=', guest_id)
                     // .$call(log)
                     .executeTakeFirstOrThrow();
                 // if balance
                 // add payment entries
-                if (parseFloat(balance_amount) >= parseFloat(total_amount)) {
+                if (balance_amount >= total_amount) {
                     const payments = items.map(async (item) => {
                         if (item.units) {
                             await transaction
@@ -191,7 +196,7 @@ export const actions: Actions = {
                                     volunteer_id,
                                     event_id,
                                     event_item_id: item.event_item_id,
-                                    trx_amount: parseInt(item.units) * parseFloat(item.price) * -1,
+                                    trx_amount: item.units * item.price * -1,
                                     trx_ts: timestamp,
                                     payment_method: 'qrcode',
                                     notes: 'payment'
@@ -220,7 +225,7 @@ export const actions: Actions = {
                 balance_amount: new_balance_amount
             });
         } catch (e) {
-            error(400, 'Error: ' + e.message);
+            error(400, 'Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
         }
     }
 };

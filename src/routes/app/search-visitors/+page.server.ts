@@ -40,6 +40,6 @@ export const load = (async () => {
         return { items };
 
     } catch (e) {
-        throw error(400, 'Error: ' + e.message);
+        throw error(400, 'Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
     }
 }) satisfies PageServerLoad;

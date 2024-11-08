@@ -1,9 +1,7 @@
 import { Lucia, TimeSpan } from 'lucia';
+
+import { adapter } from './db.js';
 import { dev } from '$app/environment';
-import crypto from 'node:crypto';
-
-import { pool, adapter } from './db.js';
-
 
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
@@ -55,21 +53,3 @@ interface DatabaseUserAttributes {
 	current_event_id: number;
     approved: number;
 }
-
-
-/*
-const user = await db('fry_users')
-			.select(['username', 'userfirstname', 'userlastname', 'token', 'userpass', 'salt'])
-			.where('username', '=', username)
-			.limit(1);
-
-		if (user.length && generatePasswordHash(password, user[0].salt) === user[0].userpass) {
-			const jwt = await getNewJWT(user[0]);
-			cookies.set('jwt', jwt, {path: '/', httpOnly: true});
-
-			throw redirect(303, prevUrl);
-		} else {
-			return fail(401, { error: 'Invalid Credentials... Login failed...' });
-		}
-
-**/

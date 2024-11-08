@@ -6,7 +6,7 @@ import { sql } from 'kysely';
 
 export const load = (async ({ locals }) => {
     if (!locals.user) {
-        // show login page
+        error(401, 'Please login first');
     }
 
 	const volunteer_id = locals.user.id;
@@ -40,14 +40,15 @@ export const load = (async ({ locals }) => {
 					.selectFrom('visitor_registration as vri')
 					.whereRef('vri.master_user_id', '=', 'tl.visitor_id')
 					.where('vri.group_qr', '=', 1)
-					.select(eb.fn('group_concat', ['vri.uid']))
+					.select((eb) => eb.fn.agg('group_concat', ['vri.uid']).as('group_uids'))
 					.orderBy('id')
 					.as('group_uids'),
 				eb
 					.selectFrom('transaction_log as tli')
 					.whereRef('tli.log_ref_id', '=', 'tl.id')
 					.where('tli.notes', '=', 'reversal')
-					.select((eb2) => eb2.fn('ifnull', [eb2.fn.count('tli.id'), sql`0`])).as('reversal_count')
+                    .select((eb) => eb.fn('ifnull', [eb.fn.count('tli.id'), sql`0`]).as('reversal_count'))
+                    .as('reversal_count')
 			])
 			.limit(15)
 			// .$call(log)

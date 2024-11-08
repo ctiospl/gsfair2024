@@ -76,8 +76,8 @@ export const GET = async ({ params, locals }) => {
             } else {
                 return json({ id, sub_id: id, name, balance_amount, uid, master_uid, uuid: randomUUID() });
             }
-        } catch (e) {
-            error(400, 'Error: ' + e.message);
+        } catch (e: unknown) {
+            error(400, 'Error: ' + (e instanceof Error ? e.message : 'Unknown error'));
         }
     } else {
         error(400, 'Missing uid');
