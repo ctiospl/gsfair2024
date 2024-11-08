@@ -9,6 +9,7 @@
 	import FakeProgressBar from '$lib/components/FakeProgressBar.svelte';
 	import PopupQrScanner from '$lib/components/PopupQrScanner.svelte';
 	import PopupRoute from '$lib/components/PopupRoute.svelte';
+	import PopupPayment from '$lib/components/PopupPayment.svelte';
 	import Preloader from '$lib/components/Preloader.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import {
@@ -62,7 +63,9 @@
 	});
 	$effect.pre(async () => {
 		await listDevices();
+		// }
 	});
+
 	async function listDevices() {
 		let mediaStream = null;
 		try {
@@ -107,26 +110,28 @@
 	});
 </script>
 
-<div class="!h-dvh !min-h-dvh">
-	{@render children()}
+<!-- <div class="!h-dvh !min-h-dvh"> -->
+{@render children()}
 
-	<Toaster position="top-center" closeButton={notificationWithButton} />
+<PopupRoute />
+<PopupPayment />
+<PopupQrScanner
+	onScanSuccess={QrScannerOnScan.value}
+	scannerTitle={QrScannerTitle.value}
+	autostart={QrScannerAutostart.value}
+/>
 
-	<ConfirmDialog
-		bind:open={ConfirmDialogProps.open}
-		title={ConfirmDialogProps.title}
-		description={ConfirmDialogProps.description}
-		onConfirm={ConfirmDialogProps.onConfirm}
-		onCancel={ConfirmDialogProps.onCancel}
-	/>
+<Toaster position="top-center" closeButton={notificationWithButton} />
 
-	<PopupRoute />
-	<FakeProgressBar />
+<FakeProgressBar />
+<Preloader bind:open={LoadingDialog.open} />
+<!-- </div> -->
 
-	<PopupQrScanner
-		onScanSuccess={QrScannerOnScan.value}
-		scannerTitle={QrScannerTitle.value}
-		autostart={QrScannerAutostart.value}
-	/>
-	<Preloader bind:open={LoadingDialog.open} />
-</div>
+<ConfirmDialog
+	class="!z-50"
+	bind:open={ConfirmDialogProps.open}
+	title={ConfirmDialogProps.title}
+	description={ConfirmDialogProps.description}
+	onConfirm={ConfirmDialogProps.onConfirm}
+	onCancel={ConfirmDialogProps.onCancel}
+/>

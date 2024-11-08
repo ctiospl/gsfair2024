@@ -37,8 +37,8 @@
 	});
 </script>
 
-<div class="">
-	<!-- keep div to keep navbar visible while scrolling -->
-	{@render children()}
-	<Menu />
-</div>
+<!-- <div class=""> -->
+<!-- keep div to keep navbar visible while scrolling -->
+{@render children()}
+<Menu />
+<!-- </div> -->

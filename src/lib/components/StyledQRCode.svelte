@@ -2,23 +2,22 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { QRBorderPlugin } from '$lib/QRBorderPlugin';
-	import type {
-		DrawType,
-		TypeNumber,
-		Mode,
-		ErrorCorrectionLevel,
-		DotType,
-		CornerSquareType,
-		CornerDotType
-	} from 'qr-code-styling';
+	import { cn } from '$lib/utils';
 
 	interface Props {
 		qrcodeText?: string;
 		message?: string;
 		cta?: string;
+		class?: string;
 	}
 
-	let { qrcodeText = '', message = '', cta = 'SCAN ME' }: Props = $props();
+	let {
+		qrcodeText = '',
+		message = '',
+		cta = 'SCAN ME',
+		class: className,
+		...restProps
+	}: Props = $props();
 	let qrcc = $state('');
 	let options = {
 		type: 'svg',
@@ -150,4 +149,8 @@
 	});
 </script>
 
-{#await qrcc then qrcc}<img src={qrcc} alt="" />{/await}
+<div class={cn('flex items-center justify-center', className)}>
+	{#await qrcc then qrcc}
+		<img src={qrcc} alt="QR Code" class="mb-8 block h-auto max-w-full px-8" />
+	{/await}
+</div>

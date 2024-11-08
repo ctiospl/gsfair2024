@@ -3,8 +3,8 @@
 
 	// lib/functions
 	import { page } from '$app/stores';
-	import { afterNavigate } from '$app/navigation';
 	import { showMessage } from '$lib/flash-messages.svelte';
+	import { SetEvent } from '$lib/common-utils.svelte.js';
 
 	// components
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -24,37 +24,16 @@
 	} from '$lib/ui-item-states.svelte';
 	import { eventLS } from '$lib/web-storage.svelte';
 
-	$effect(async () => {
-		QrScannerTitle.value = 'Select Event';
-		QrScannerOnScan.value = await SetEvent;
-		console.log('$eventLS.event_code :>> ', $eventLS);
-		if ($eventLS.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60) {
-			await SetEvent($eventLS.event_code);
-		}
+	$effect(() => {
+		(async () => {
+			QrScannerTitle.value = 'Select Event';
+			QrScannerOnScan.value = await SetEvent;
+			console.log('$eventLS.event_code :>> ', $eventLS);
+			if ($eventLS.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60) {
+				await SetEvent($eventLS.event_code);
+			}
+		})();
 	});
-
-	async function SetEvent(eventCode: string, resetSince?: false) {
-		LoadingDialog.open = true;
-		const res = await fetch(`/app/api/events/${eventCode}`);
-		const data = await res.json();
-		if ('error' in data) {
-			LoadingDialog.open = false;
-			return showMessage(page, { type: 'error', text: data.message });
-		}
-		CurrentEvent.id = data.id;
-		CurrentEvent.event_name = data.event_name;
-		CurrentEvent.event_code = data.event_code;
-		CurrentEvent.has_items = data.has_items;
-		CurrentEvent.price = data.price;
-		CurrentEvent.since = (Date.now() / 1000) | 0;
-
-		CurrentEvent.event_items = data.event_items;
-		$eventLS.event_name = data.event_name;
-		$eventLS.event_code = data.event_code;
-		$eventLS.since = CurrentEvent.since;
-		LoadingDialog.open = false;
-		console.log('CurrentEvent :>> ', $state.snapshot(CurrentEvent));
-	}
 </script>
 
 <Navbar title="Event Selector">
@@ -78,7 +57,7 @@
 </Navbar>
 
 <div class="flex h-[calc(100dvh-5rem)] flex-col">
-	{#if CurrentEvent.event_name && ((Date.now() / 1000) | 0) - CurrentEvent?.since < 3 * 60 * 60}
+	{#if $eventLS.event_name && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60}
 		<div class="flex flex-1 items-center justify-center">
 			<div class="flex flex-col items-center justify-center">
 				<h2 class="text-3xl font-bold">Current Event</h2>

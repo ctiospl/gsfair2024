@@ -4,10 +4,13 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { page } from '$app/stores';
 	import { showMessage } from '$lib/flash-messages.svelte';
+	import { SetEvent } from '$lib/common-utils.svelte.js';
+	import { PUBLIC_UPI_URL } from '$env/static/public';
 
 	// components
 	import Navbar from '$lib/components/Navbar.svelte';
 	import StepCounter from '$lib/components/StepCounter.svelte';
+	import * as Card from '$lib/components/ui/card';
 
 	// states
 	import {
@@ -17,15 +20,21 @@
 		QrScannerAutostart,
 		PopupQrScannerOpened,
 		CurrentEvent,
-		ConfirmDialogProps
+		ConfirmDialogProps,
+		PopupPaymentProps,
+		ResetPopupPaymentProps
 	} from '$lib/ui-item-states.svelte';
+	import { eventLS } from '$lib/web-storage.svelte';
 
 	import { Menu } from 'lucide-svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Switch } from '$lib/components/ui/switch';
+
 	// import { Checkbox } from "$lib/components/ui/checkbox";
 	import { Label } from '$lib/components/ui/label';
 	import { QrCode, IndianRupee } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	type formItem = {
 		event_item_id: number;
@@ -46,15 +55,31 @@
 		QrScannerTitle.value = 'Visitor Check QR Balance';
 		QrScannerOnScan.value = await onScanVisitor;
 		QrScannerAutostart.value = true;
+		if (CurrentEvent.event_code == '' || CurrentEvent.event_code != data.eventcode) {
+			SetEvent(data.eventcode);
+		}
+		// SetEvent('T1');
+		// CheckBalance('PRN');
 	});
 
-	const { form, errors, message, constraints, delayed, enhance } = superForm(data.form, {
+	const {
+		form,
+		errors,
+		message,
+		constraints,
+		delayed,
+		enhance,
+		reset: resetForm
+	} = superForm(data.form, {
 		dataType: 'json',
 		// applyAction: true,
 		invalidateAll: true,
 		resetForm: false,
 		onUpdated({ form }) {
 			name = '';
+			balance = 0;
+			uid = '';
+			ResetPopupPaymentProps();
 			if (form.message) {
 				showMessage(page, {
 					type: 'success',
@@ -80,6 +105,7 @@
 		name = data.name;
 		uid = uid;
 		$form.guest_id = data.id;
+		$form.guest_sub_id = data.sub_id;
 		PopupQrScannerOpened.value = false;
 	}
 
@@ -113,9 +139,10 @@
 			},
 			{ taint: false }
 		);
+		console.log('$form :>> ', $form);
 	}
 
-	function onScanToy(scanResult: string) {
+	async function onScanToy(scanResult: string) {
 		const toyCode = scanResult;
 		let findFormIndex = ($form.items as formItem[]).findIndex((i) => i.item_code == toyCode);
 
@@ -129,30 +156,29 @@
 		}
 
 		PopupQrScannerOpened.value = false;
+		history.back();
 		updateFormTotal();
 	}
 
 	async function onScanVisitor(scanResult: string) {
+		ResetPopupPaymentProps();
+		resetForm();
 		uid = scanResult;
 		await CheckBalance(scanResult);
 		updateFormTotal();
 	}
 
-	function confirmPaymentReceipt() {
-		ConfirmDialogProps.open = true;
-		ConfirmDialogProps.title = 'Confirm Payment Receipt';
-		ConfirmDialogProps.description = `Please Confirm the reciept of Amount ₹ ${$form.recharge_amt} from ${name} (${$form.recharge_payment_method})`;
-		ConfirmDialogProps.confirmButtonText = 'Yes';
-		ConfirmDialogProps.cancelButtonText = 'No';
-		ConfirmDialogProps.onConfirm = async () => {
-			ConfirmDialogProps.open = false;
-			paymentPopupOpened = false;
-			return Promise.resolve();
-		};
-	}
+	$effect.pre(async () => {
+		console.log('eventLS :>> ', $eventLS);
+		if ($eventLS.event_code && ((Date.now() / 1000) | 0) - $eventLS?.since < 3 * 60 * 60) {
+		} else {
+			showMessage(page, { type: 'error', text: 'Selct an Event' });
+			goto('/app/event-selector');
+		}
+	});
 </script>
 
-<Navbar title="Collect Payment">
+<Navbar title="Collect Payment {$eventLS.event_name}">
 	{#snippet leftLink()}
 		<Button
 			variant="link"
@@ -199,36 +225,36 @@
 				</div>
 			{/if}
 
-			<div class="mt-4 text-center">
+			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
 				{#if !CurrentEvent.has_items}
 					<div>
-						<div class="mb-1 block text-lg">Ticket</div>
+						<div class="mb-1 block text-lg">Ticket - {CurrentEvent.event_name}</div>
 						<div class="text-5xl">
-							{CurrentEvent.price}
+							₹ {CurrentEvent.price}
 						</div>
 					</div>
 
-					<div class="py-8">
-						<!-- <div class="block text-xs mb-1">count</div> -->
+					<!-- <div class="block text-xs mb-1">count</div> -->
 
-						<StepCounter
-							value={$form.items[0].units}
-							onPlus={() => {
-								if (checkFormTotal(0)) {
-									$form.items[0].units = $form.items[0].units + 1;
-									updateFormTotal();
-								}
-							}}
-							onMinus={() => {
-								$form.items[0].units = $form.items[0].units - 1 < 1 ? 1 : $form.items[0].units - 1;
+					<StepCounter
+						class="py-6"
+						value={$form.items[0].units}
+						onPlus={() => {
+							if (checkFormTotal(0)) {
+								$form.items[0].units = $form.items[0].units + 1;
 								updateFormTotal();
-							}}
-						/>
-					</div>
+							}
+						}}
+						onMinus={() => {
+							$form.items[0].units = $form.items[0].units - 1 < 1 ? 1 : $form.items[0].units - 1;
+							updateFormTotal();
+						}}
+					/>
+
 					<div>
 						<div class="mb-1 block text-lg">Total</div>
 						<div class="text-5xl">
-							{CurrentEvent.price * $form.items[0].units}
+							₹ {CurrentEvent.price * $form.items[0].units}
 						</div>
 					</div>
 				{:else}
@@ -243,32 +269,31 @@
 										</div>
 									</div>
 
-									<div class=" content-center">
-										<StepCounter
-											value={$form.items[i].units}
-											onPlus={() => {
-												// if (checkFormTotal(i)) {
-												$form.items[i].units = $form.items[i].units + 1;
-												updateFormTotal();
-												// }
-											}}
-											onMinus={() => {
-												$form.items[i].units =
-													$form.items[i].units - 1 < 0 ? 0 : $form.items[i].units - 1;
-												updateFormTotal();
-											}}
-										/>
-									</div>
+									<StepCounter
+										value={$form.items[i].units}
+										onPlus={() => {
+											// if (checkFormTotal(i)) {
+											$form.items[i].units = $form.items[i].units + 1;
+											updateFormTotal();
+											// }
+										}}
+										onMinus={() => {
+											$form.items[i].units =
+												$form.items[i].units - 1 < 0 ? 0 : $form.items[i].units - 1;
+											updateFormTotal();
+										}}
+									/>
 								</div>
 							</div>
 						{/each}
 					{:else}
 						{#each CurrentEvent?.event_items ?? [] as item, i}
-							<div class="mb-4 flex flex-col">
-								<div class="mb-2 block text-lg">{item.item_name}</div>
-								<div class="flex items-center justify-around">
+							<div class="">
+								<div class="flex flex-col">
+									<div class="mb-2 block text-lg">{item.item_name}</div>
+									<!-- <div class="flex items-center justify-around"> -->
 									<div class="flex flex-col">
-										<div class="text-5xl">
+										<div class="text-3xl">
 											{item.price}
 										</div>
 									</div>
@@ -289,7 +314,9 @@
 											}}
 										/>
 									</div>
+									<!-- </div> -->
 								</div>
+								<Separator class="my-4" />
 							</div>
 						{/each}
 					{/if}
@@ -297,7 +324,7 @@
 					<div>
 						<div class="my-4 block text-lg">Total</div>
 						<div class="text-5xl">
-							{$form.total_amount}
+							₹ {$form.total_amount}
 						</div>
 					</div>
 				{/if}
@@ -305,14 +332,32 @@
 				{#if $form.total_amount > ($form.use_qrcode_balance ? balance : 0) + ('recharge_amt' in $form && $form.recharge_amt ? $form.recharge_amt : 0)}
 					<div class="text-center text-2xl text-red-500">Insufficient QrCode Balance</div>
 					{#if CurrentEvent.event_code == 'T1'}
-						<div class="mt-8">
+						<div class="mt-8 w-full">
 							<Button
-								class="mt-4 h-24 w-[90%] !bg-emerald-500 text-2xl"
+								class="mt-4 h-24 w-[70%] !bg-emerald-500 text-2xl"
 								onclick={(e) => {
 									e.preventDefault;
-									paymentPopupOpened = true;
-									$form.recharge_amt =
-										$form.total_amount - ($form.use_qrcode_balance ? balance : 0);
+
+									let recharge_amt = $form.total_amount - ($form.use_qrcode_balance ? balance : 0);
+									PopupPaymentProps.title = `Amount to Collect - ₹ ${recharge_amt.toFixed(2)}`;
+									PopupPaymentProps.guest_name = name;
+									PopupPaymentProps.items = $form.items.map((item) => ({
+										name: item.item_name,
+										amount: item.price * item.units,
+										units: item.units
+									}));
+									PopupPaymentProps.total_amount = $form.total_amount;
+									PopupPaymentProps.recharge_amt = recharge_amt;
+									PopupPaymentProps.use_qrcode_balance = $form.use_qrcode_balance ?? false;
+									PopupPaymentProps.qrcode_balance = balance;
+									PopupPaymentProps.guest_id = $form.guest_id;
+									PopupPaymentProps.guest_name = name;
+									PopupPaymentProps.qrcode_text = `${PUBLIC_UPI_URL}${recharge_amt}`;
+									PopupPaymentProps.qrcode_message = `Paying ${$eventLS.event_name} - Rs ${recharge_amt.toFixed(2)}`;
+									PopupPaymentProps.onConfirm = async (param: string) => {
+										console.log('param :>> ', param);
+									};
+									PopupPaymentProps.open = true;
 								}}
 							>
 								<IndianRupee class="mr-2 h-8 w-8" />
@@ -321,8 +366,8 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="mt-8">
-						<Button class="mt-4 h-24 w-[90%] !bg-black text-2xl" type="submit">
+					<div class="mt-8 w-full">
+						<Button class="mt-4 h-24 w-[70%] text-2xl" type="submit">
 							<IndianRupee class="mr-2 h-8 w-8" />
 							Collect Payment
 						</Button>
@@ -333,25 +378,92 @@
 				<Button
 					onclick={async () => {
 						QrScannerTitle.value = 'Scan Toys QR Code';
-						QrScannerOnScan.value = await onScanVisitor;
+						QrScannerOnScan.value = await onScanToy;
 						PopupQrScannerOpened.value = true;
 					}}
-					class="left-4-safe bottom-4-safe fixed z-20 !bg-green-500"
+					class="fixed bottom-4 left-4 z-20 rounded-full !bg-green-500 p-6 text-2xl [&_svg]:size-7"
 				>
 					<QrCode /> Toys
 				</Button>
 			{/if}
+		{:else}
+			<!-- add last_payment_info -->
+			<!-- {$form.last_payment_info}
+             last_payment_info: {
+                visitor_id: 490,
+                visitor_name: 'Nyra Thakkar',
+                sub_visitor_id: 492,
+                sub_visitor_name: 'Chintan',
+                trx_amount: -50,
+                payment_method: 'qrcode',
+                trx_ts: 1730989321
+            }
+
+            -->
+
+			<div class="flex h-[calc(100dvh-5rem)] flex-col">
+				<div class="flex flex-1 items-center justify-center">
+					<div class="flex flex-col items-center justify-center text-center">
+						<p class="text-2xl">{$eventLS.event_name}</p>
+						<p class="text-2xl font-bold">Scan Visitor's QrCode <br />to Collect Payment</p>
+					</div>
+				</div>
+				<!-- {#if data.last_payment_info} -->
+				<div class="flex flex-1 items-center justify-center">
+					<Card.Root class="w-full max-w-md">
+						<Card.Header>
+							<Card.Title class="flex items-center justify-between">
+								<span>Last Payment Details</span>
+								<span
+									class={`text-lg font-bold ${data.last_payment_info.trx_amount < 0 ? 'text-red-500' : 'text-green-500'}`}
+								>
+									₹{Math.abs(data.last_payment_info.trx_amount)}
+								</span>
+							</Card.Title>
+							<Card.Description>
+								Transaction ID: {data.last_payment_info.visitor_id}-{data.last_payment_info
+									.sub_visitor_id}
+							</Card.Description>
+						</Card.Header>
+
+						<Card.Content class="space-y-4">
+							<div class="grid grid-cols-2 gap-4">
+								{#if data.last_payment_info.sub_visitor_name}
+									<div>
+										<p class="font-medium">{data.last_payment_info.sub_visitor_name}</p>
+									</div>
+								{/if}
+								<div>
+									<p class="font-medium">{data.last_payment_info.visitor_name}</p>
+								</div>
+							</div>
+
+							<div class="flex items-center justify-between border-t pt-4">
+								<div>
+									<p class="text-sm text-muted-foreground">Payment Method</p>
+									<p class="font-medium capitalize">{data.last_payment_info.payment_method}</p>
+								</div>
+								<div class="text-right">
+									<p class="text-sm text-muted-foreground">Date</p>
+									<p class="font-medium">{data.last_payment_info.trx_ts}</p>
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
+				<!-- {/if} -->
+			</div>
 		{/if}
 	{/if}
 </form>
 
 <Button
 	onclick={async () => {
-		QrScannerTitle.value = 'Scan Toys QR Code';
+		QrScannerTitle.value = 'Scan Visitor QR Code';
 		QrScannerOnScan.value = await onScanVisitor;
 		PopupQrScannerOpened.value = true;
 	}}
-	class="fixed bottom-4 right-4 z-20 rounded-full !bg-green-500"
+	class="fixed bottom-4 right-4 h-16 w-16  rounded-full !bg-red-500"
 >
-	<QrCode /> Toys
+	<QrCode class="!size-7" />
 </Button>
